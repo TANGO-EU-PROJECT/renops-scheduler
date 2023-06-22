@@ -22,8 +22,10 @@ class GeoLocation:
         if isinstance(location, str):
             lat, lon = self._geocode_location(location)
         elif location is None:
-            print("Automatic location detection!")
-            lat, lon = self._get_location()["loc"].split(",")
+            loc = self._get_location()
+            print("Location not specified, running automatic location detection!")
+            print(f'Found: {loc["city"]}, {loc["country"]}')
+            lat, lon = loc["loc"].split(",")
         elif isinstance(location, dict) and "lat" in location and "lon" in location:
             lat, lon = location["lat"], location["lon"]
         else:
