@@ -23,8 +23,9 @@ class GeoLocation:
             lat, lon = self._geocode_location(location)
         elif location is None:
             loc = self._get_location()
-            print("Location not specified, running automatic location detection!")
-            print(f'Found: {loc["city"]}, {loc["country"]}')
+            print(
+                f'Location not specified, running automatic location detection! Found: {loc["city"]}, {loc["country"]}'
+            )
             lat, lon = loc["loc"].split(",")
         elif isinstance(location, dict) and "lat" in location and "lon" in location:
             lat, lon = location["lat"], location["lon"]
