@@ -1,4 +1,4 @@
-from typing import Any, Dict, Union, Optional
+from typing import Any, Dict, Optional, Union
 
 import pandas as pd
 import requests
@@ -7,7 +7,7 @@ from utils.geolocation import GeoLocation
 
 
 class DataFetcher:
-    def __init__(self, url: str, location: Union[str, Dict[str, float]]):
+    def __init__(self, url: str, location: Union[str, Dict[str, float]] = None):
         """
         Initialize the DataFetcher class.
         Args:
