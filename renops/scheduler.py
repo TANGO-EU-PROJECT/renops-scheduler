@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 
-from utils.datafetcher import DataFetcher
+from renops.datafetcher import DataFetcher
 
 
 def parse_time(time_string):
