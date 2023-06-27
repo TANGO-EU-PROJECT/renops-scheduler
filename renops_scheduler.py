@@ -30,10 +30,10 @@ def main():
         "-l", "--location", default=None, help="Location in string or coordinates."
     )
     parser.add_argument(
-        "-r", "--runtime", type=int, default=1, help="Runtime in hours."
+        "-r", "--runtime", type=int, default=3, help="Runtime in hours."
     )
     parser.add_argument(
-        "-d", "--deadline", type=int, default=168, help="Deadline in hours."
+        "-d", "--deadline", type=int, default=120, help="Deadline in hours."
     )
     parser.add_argument("-v", "--verbose", type=int, default=None, help="Verbose mode.")
 
