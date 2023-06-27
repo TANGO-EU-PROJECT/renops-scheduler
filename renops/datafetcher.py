@@ -1,9 +1,32 @@
+import hashlib
+from datetime import datetime
 from typing import Any, Dict, Optional, Union
 
 import pandas as pd
 import requests
 
 from renops.geolocation import GeoLocation
+
+
+def generate_hash(seed: str) -> str:
+    """
+    Generate a hash based on the current timestamp rounded to minutes and a seed value.
+
+    Args:
+        seed: The seed value to incorporate into the hash.
+
+    Returns:
+        The generated hash as a hexadecimal string.
+
+    """
+    current_time = datetime.now().replace(
+        second=0, microsecond=0
+    )  # Round down to minutes
+    timestamp = str(current_time).encode("utf-8")
+    seed = str(seed).encode("utf-8")
+    hash_object = hashlib.sha256(timestamp + seed)
+    hash_value = hash_object.hexdigest()
+    return hash_value
 
 
 class DataFetcher:
@@ -25,6 +48,7 @@ class DataFetcher:
             dict or None: The fetched data as a JSON object, or None if an error occurred.
         """
         try:
+            self.params["key"] = generate_hash(4224)
             response = requests.get(self.url, params=self.params)
             response.raise_for_status()  # Raises an exception for 4xx or 5xx status codes
             data = response.json()
