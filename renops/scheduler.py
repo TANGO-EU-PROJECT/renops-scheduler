@@ -39,7 +39,7 @@ def main():
 
     args = parser.parse_args()
 
-    url = "http://localhost:5689/forecast/renewable_potential"
+    url = "https://renops-api-tango.xlab.si/forecast/renewable_potential"
     fetcher = DataFetcher(url)
     data = fetcher.fetch_data()
 
