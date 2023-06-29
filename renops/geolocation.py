@@ -21,6 +21,7 @@ class GeoLocation:
         """
         if isinstance(location, str):
             lat, lon = self._geocode_location(location)
+            print(f"Location specified: {location}, lat: {lat} lon: {lon}")
         elif location is None:
             loc = self._get_location()
             print(
@@ -29,6 +30,7 @@ class GeoLocation:
             lat, lon = loc["loc"].split(",")
         elif isinstance(location, dict) and "lat" in location and "lon" in location:
             lat, lon = location["lat"], location["lon"]
+            print(f"Location specified: {location}")
         else:
             raise ValueError("Invalid location format")
         return {"lat": lat, "lon": lon}
