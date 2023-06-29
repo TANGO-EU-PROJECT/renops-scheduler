@@ -17,10 +17,8 @@ To install **renops-scheduler**, follow these steps:
 
 ## Usage
 
-Once you have installed **renops-scheduler**, you can use it to schedule and execute Python scripts. The program accepts several command-line arguments to customize the execution. Here's an overview of the available options:
-
+Once you have installed **renops-scheduler**, you can use it to schedule and execute Python scripts.
 To use the program, follow these steps:
-
 
 1. Open a terminal or command prompt.
 2. Create a new file named `test.py` and write the following content to it:
@@ -40,6 +38,7 @@ To use the program, follow these steps:
    This will execute the `test.py` script with a deadline of 1 hour.
 
 ## Optional arguments
+The program accepts several command-line arguments to customize the execution. Here's an overview of the available options:
 
 The following options are available when using **renops-scheduler**:
 - `-l LOCATION`, `--location LOCATION`: Specify a location in the format "settlement,country" (e.g., "Berlin, Germany"). If not provided, scheduler automatically detects location based of the IP!. (will be optional in future)
