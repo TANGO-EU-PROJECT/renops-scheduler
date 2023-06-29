@@ -40,6 +40,7 @@ To use the program, follow these steps:
 
 
 ## Optional arguments
+The program accepts several command-line arguments to customize the execution. Here's an overview of the available options:
 
 The program accepts several command-line arguments to customize the execution. Here's an overview of the available options:
 - `-l LOCATION`, `--location LOCATION`: Specify a location in the format "settlement,country" (e.g., "Berlin, Germany"). If not provided, scheduler automatically detects location based of the IP - (This will be optiononal in future releases)
