@@ -21,15 +21,23 @@ Once you have installed **renops-scheduler**, you can use it to schedule and exe
 
 To use the program, follow these steps:
 
+
 1. Open a terminal or command prompt.
-2. Navigate to the directory where your Python script is located.
-3. Run the following command, replacing `path/to/script.py` with the actual path to your script:
+2. Create a new file named `test.py` and write the following content to it:
+
+   ```python
+   print("Hello World!")
+   ```
+
+   Save the file in a directory of your choice.
+
+3. Run the following command to execute the script immediately with a deadline of 1 hour:
 
    ```
-   renops-scheduler path/to/script.py
+   renops-scheduler test.py -d 1
    ```
 
-   This will execute the specified script with default settings.
+   This will execute the `test.py` script with a deadline of 1 hour.
 
 ## Optional arguments
 
