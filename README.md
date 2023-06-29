@@ -41,7 +41,7 @@ To use the program, follow these steps:
 The program accepts several command-line arguments to customize the execution. Here's an overview of the available options:
 
 The following options are available when using **renops-scheduler**:
-- `-l LOCATION`, `--location LOCATION`: Specify a location in the format "settlement,country" (e.g., "Berlin, Germany"). If not provided, scheduler automatically detects location based of the IP!. (will be optional in future)
+- `-l LOCATION`, `--location LOCATION`: Specify a location in the format "settlement,country" (e.g., "Berlin, Germany"). If not provided, scheduler automatically detects location based of the IP - will be optional in future releases.
 - `-r RUNTIME`, `--runtime RUNTIME`: Specify the runtime in hours. The default value is 3.
 - `-d DEADLINE`, `--deadline DEADLINE`: Specify the deadline in hours. The default value is 120. If deadline is smaller than first feasible interval, the program will execute immediately
 
