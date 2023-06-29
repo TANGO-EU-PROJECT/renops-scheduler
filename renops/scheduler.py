@@ -20,14 +20,17 @@ def wait_until(target_time):
 
 
 def execute_script(script_path):
-    subprocess.run(["python", script_path])
+    subprocess.run(["python3", script_path])
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("script_path", help="Path to the script to be executed.")
     parser.add_argument(
-        "-l", "--location", default=None, help="Location in string or coordinates."
+        "-l",
+        "--location",
+        default=None,
+        help="Location in string - 'settlement,country' i.e 'Berlin, Germany')",
     )
     parser.add_argument(
         "-r", "--runtime", type=int, default=3, help="Runtime in hours."
@@ -38,9 +41,8 @@ def main():
     parser.add_argument("-v", "--verbose", type=int, default=None, help="Verbose mode.")
 
     args = parser.parse_args()
-
     url = "https://renops-api-tango.xlab.si/forecast/renewable_potential"
-    fetcher = DataFetcher(url)
+    fetcher = DataFetcher(url, location=args.location)
     data = fetcher.fetch_data()
 
     res = data.resample(str(args.runtime) + "H").mean()
@@ -48,14 +50,16 @@ def main():
 
     current_date = pd.Timestamp(datetime.now())
     deadline_date = pd.Timestamp(datetime.now() + timedelta(hours=args.deadline))
-    filtered_res = res[(res.index > current_date) & (res.index < deadline_date)]
+    filtered_res = res[(res.index >= current_date) & (res.index < deadline_date)]
 
     # Here you would call the function to get the optimal time, using the location, runtime and deadline
     # For now, let's just use the deadline time.
-    optimal_time = filtered_res.index[0]
 
-    if len(filtered_res) == 1:
+    if len(filtered_res) <= 1:
         optimal_time = datetime.now()
+        filtered_res[pd.Timestamp(datetime.now())] = None
+    else:
+        optimal_time = filtered_res.index[0]
 
     print(
         "Found optimal time between ",
