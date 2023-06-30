@@ -58,9 +58,7 @@ def main():
     res = data.resample(str(args.runtime) + "H").mean()
     res = res.renewable_potential_forecast_hourly
 
-    renewables_now = res.values[0]
     res = res.sort_values(ascending=False)
-
     current_date = pd.Timestamp(datetime.now())
     deadline_date = pd.Timestamp(datetime.now() + timedelta(hours=args.deadline))
     start_execution_date = pd.Timestamp(deadline_date - timedelta(hours=args.runtime))
@@ -75,6 +73,11 @@ def main():
 
     if len(filtered_res) <= 1:
         optimal_time = datetime.now()
+
+        renewables_now = data[data.index >= optimal_time]
+        renewables_now = renewables_now.renewable_potential_forecast_hourly.values[
+            0
+        ].round(2)
         filtered_res[pd.Timestamp(datetime.now())] = renewables_now
         print("No renewable window whitin given deadline!")
         print(f"Current renewable potential is: {renewables_now}")
