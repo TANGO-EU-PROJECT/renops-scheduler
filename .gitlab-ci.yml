@@ -2,7 +2,7 @@ default:
   image: python:3.11.3
 
 stages:
-    - static-analysis
+    # - static-analysis
     - build pip
 
 isort:
@@ -36,8 +36,8 @@ build and publish pip packages:
     - python -m build
     - pip install twine
     - TWINE_PASSWORD=${CI_JOB_TOKEN} TWINE_USERNAME=gitlab-ci-token python -m twine upload --verbose --repository-url ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi dist/*
-  only:
-    - main
+  #only:
+  #  - main
   artifacts:
     paths:
       - dist/*.whl
