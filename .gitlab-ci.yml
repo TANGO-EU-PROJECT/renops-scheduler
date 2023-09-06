@@ -2,7 +2,7 @@ default:
   image: python:3.11.3
 
 stages:
-    # - static-analysis
+    - static-analysis
     - build pip
 
 isort:
