@@ -21,15 +21,18 @@ def execute_script(script_path):
     subprocess.run(["python3", script_path])
 
 
-def hour_to_second(hour):
+def hour_to_second(hour: int) -> int:
+    "Converts hours to seconds"
     return hour * 3600
 
 
-def convert_seconds_to_hour(seconds):
+def convert_seconds_to_hour(seconds: int) -> int:
+    "Converts seconds to hour with no residual"
     return int(seconds // 3600)
 
 
-def convert_seconds_to_minutes(seconds):
+def convert_seconds_to_minutes(seconds: int) -> int:
+    "Converts seconds to minutes with no residual"
     return int((seconds % 3600) // 60)
 
 
