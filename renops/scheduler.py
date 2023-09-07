@@ -3,9 +3,7 @@
 import argparse
 import subprocess
 import time
-from datetime import datetime, timedelta
-
-import pandas as pd
+from datetime import datetime
 
 from renops.datafetcher import DataFetcher
 
@@ -15,24 +13,29 @@ def parse_time(time_string):
 
 
 def wait_until(target_time):
-    while datetime.now() < target_time:
+    while int(time.time()) < target_time:
         time.sleep(5)  # Sleep for a bit to not hog the CPU
 
 
 def execute_script(script_path):
     subprocess.run(["python3", script_path])
 
+
 def hour_to_second(hour):
     return hour * 3600
+
 
 def convert_seconds_to_hour(seconds):
     return int(seconds // 3600)
 
+
 def convert_seconds_to_minutes(seconds):
     return int((seconds % 3600) // 60)
 
+
 def to_datetime(epoch):
-    return datetime.fromtimestamp(epoch).strftime('%Y-%d-%m %H:%M:%S')
+    return datetime.fromtimestamp(epoch).strftime("%Y-%d-%m %H:%M:%S")
+
 
 def main():
     print("RUNNING RENOPS SCHEDULER...")
@@ -68,14 +71,12 @@ def main():
 
     res = data.resample(str(args.runtime) + "H").mean()
     res = res.set_index("epoch")
-    res = res.sort_values(by=["renewable_potential_forecast_hourly"], ascending=False) 
+    res = res.sort_values(by=["renewable_potential_forecast_hourly"], ascending=False)
 
-    #current_date = pd.Timestamp(datetime.now())
     current_epoch = int(time.time())
     deadline_epoch = current_epoch + hour_to_second(args.deadline)
     start_execution_epoch = deadline_epoch - hour_to_second(args.runtime)
 
-    
     print("Task has to be finished by: ", to_datetime(deadline_epoch))
     filtered_res = res[
         (res.index >= current_epoch) & (res.index <= start_execution_epoch)
@@ -96,8 +97,8 @@ def main():
         print(f"Current renewable potential is: {renewables_now}")
     else:
         optimal_time = filtered_res.index[0]
-        
-        diff_seconds =  optimal_time - current_epoch
+
+        diff_seconds = optimal_time - current_epoch
         wait_hours = convert_seconds_to_hour(diff_seconds)
         wait_minutes = convert_seconds_to_minutes(diff_seconds)
 
@@ -107,8 +108,13 @@ def main():
             "and",
             to_datetime(filtered_res.index[0] + hour_to_second(args.runtime)),
         )
-        print("Renewable potential at that time is:", filtered_res.renewable_potential_forecast_hourly.values[0].round(2))
-        print(f"Waiting for {wait_hours} h {wait_minutes} min to execute {args.script_path}...")
+        print(
+            "Renewable potential at that time is:",
+            filtered_res.renewable_potential_forecast_hourly.values[0].round(2),
+        )
+        print(
+            f"Waiting for {wait_hours} h {wait_minutes} min to execute {args.script_path}..."
+        )
 
     wait_until(optimal_time)
     print(f"Executing {args.script_path} now at {datetime.now()}")
