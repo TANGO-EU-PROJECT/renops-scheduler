@@ -66,22 +66,23 @@ def main():
     deadline_epoch = current_epoch + hour_to_second(args.deadline)
     start_execution_epoch = deadline_epoch - hour_to_second(args.runtime)
 
-    print("Task has to be finished by: ", deadline_date)
+    
+    print("Task has to be finished by: ", to_datetime(deadline_epoch))
     filtered_res = res[
-        (res.index >= current_date) & (res.index <= start_execution_date)
+        (res.index >= current_epoch) & (res.index <= start_execution_epoch)
     ]
-    filtered_res = filtered_res[res != 0]
+    filtered_res = filtered_res.loc[res.renewable_potential_forecast_hourly != 0]
     # Here you would call the function to get the optimal time, using the location, runtime and deadline
     # For now, let's just use the deadline time.
 
     if len(filtered_res) <= 1:
-        optimal_time = datetime.now()
+        optimal_time = current_epoch
 
-        renewables_now = data[data.index >= optimal_time]
+        renewables_now = data[data.epoch >= optimal_time]
         renewables_now = renewables_now.renewable_potential_forecast_hourly.values[
             0
         ].round(2)
-        filtered_res[pd.Timestamp(datetime.now())] = renewables_now
+        filtered_res[int(time.time())] = renewables_now
         print("No renewable window whitin given deadline!")
         print(f"Current renewable potential is: {renewables_now}")
     else:
@@ -89,12 +90,12 @@ def main():
 
         print(
             "Found optimal time between ",
-            filtered_res.index[0],
+            to_datetime(filtered_res.index[0]),
             "and",
-            filtered_res.index[0] + timedelta(hours=args.runtime),
+            to_datetime(filtered_res.index[0] + hour_to_second(args.runtime)),
         )
-        print("Renewable potential at that time is:", filtered_res[0].round(2))
-        print(f"Waiting until {optimal_time} to execute {args.script_path}...")
+        print("Renewable potential at that time is:", filtered_res.renewable_potential_forecast_hourly.values[0].round(2))
+        print(f"Waiting for {wait_hours} h {wait_minutes} min to execute {args.script_path}...")
 
     wait_until(optimal_time)
     print(f"Executing {args.script_path} now at {datetime.now()}")
