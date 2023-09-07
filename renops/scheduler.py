@@ -58,12 +58,13 @@ def main():
     data = fetcher.fetch_data()
 
     res = data.resample(str(args.runtime) + "H").mean()
-    res = res.renewable_potential_forecast_hourly
+    res = res.set_index("epoch")
+    res = res.sort_values(by=["renewable_potential_forecast_hourly"], ascending=False) 
 
-    res = res.sort_values(ascending=False)
-    current_date = pd.Timestamp(datetime.now())
-    deadline_date = pd.Timestamp(datetime.now() + timedelta(hours=args.deadline))
-    start_execution_date = pd.Timestamp(deadline_date - timedelta(hours=args.runtime))
+    #current_date = pd.Timestamp(datetime.now())
+    current_epoch = int(time.time())
+    deadline_epoch = current_epoch + hour_to_second(args.deadline)
+    start_execution_epoch = deadline_epoch - hour_to_second(args.runtime)
 
     print("Task has to be finished by: ", deadline_date)
     filtered_res = res[
