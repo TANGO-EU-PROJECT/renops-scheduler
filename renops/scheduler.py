@@ -25,6 +25,15 @@ def execute_script(script_path):
 def hour_to_second(hour):
     return hour * 3600
 
+def convert_seconds_to_hour(seconds):
+    return int(seconds // 3600)
+
+def convert_seconds_to_minutes(seconds):
+    return int((seconds % 3600) // 60)
+
+def to_datetime(epoch):
+    return datetime.fromtimestamp(epoch).strftime('%Y-%d-%m %H:%M:%S')
+
 def main():
     print("RUNNING RENOPS SCHEDULER...")
     parser = argparse.ArgumentParser()
@@ -87,6 +96,10 @@ def main():
         print(f"Current renewable potential is: {renewables_now}")
     else:
         optimal_time = filtered_res.index[0]
+        
+        diff_seconds =  optimal_time - current_epoch
+        wait_hours = convert_seconds_to_hour(diff_seconds)
+        wait_minutes = convert_seconds_to_minutes(diff_seconds)
 
         print(
             "Found optimal time between ",
