@@ -22,6 +22,8 @@ def wait_until(target_time):
 def execute_script(script_path):
     subprocess.run(["python3", script_path])
 
+def hour_to_second(hour):
+    return hour * 3600
 
 def main():
     print("RUNNING RENOPS SCHEDULER...")
