@@ -1,0 +1,46 @@
+default:
+  image: python:3.11.3
+
+stages:
+    - static-analysis
+    - build pip
+
+isort:
+    stage: static-analysis
+    image: python:3.11.3
+    script:
+        - pip install isort
+        - isort . --check-only
+    only:
+        - merge_requests
+    allow_failure: true
+
+flake8:
+    stage: static-analysis
+    image: python:3.11.3
+    script:
+        - pip install flake8
+        - flake8 --max-line-length=120 .
+    only:
+        - merge_requests
+    allow_failure: true
+
+build and publish pip packages:
+  stage: build pip
+  script:
+    - python -V
+    - pip install virtualenv
+    - virtualenv venv
+    - source venv/bin/activate
+    - pip install build
+    - python -m build
+    - pip install twine
+    - TWINE_PASSWORD=${CI_JOB_TOKEN} TWINE_USERNAME=gitlab-ci-token python -m twine upload --verbose --repository-url ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi dist/*
+  #only:
+  #  - main
+  artifacts:
+    paths:
+      - dist/*.whl
+    expire_in: 2 days
+ # only:
+  #  - production
