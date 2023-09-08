@@ -4,52 +4,76 @@
 
 ## Installation
 
-To install **renops-scheduler**, follow these steps:
-
-1. Ensure that you have **pip** installed on your system.
-2. Download the provided package distribution file `renops_scheduler-0.0.1.tar.gz`.
-3. Open a terminal or command prompt and navigate to the directory where the file is located.
-4. Run the following command to install the package:
+To install **renops-scheduler**, run the following command:
 
    ```
-   pip install renops_scheduler-0.0.1.tar.gz
+    pip install renops-scheduler --index-url https://gitlab+deploy-token-91:auD8AGBN9ZMaWzyV4sKS@gitlab.xlab.si/api/v4/projects/2476/packages/pypi/simple
    ```
+   Command includes deploy token valid until 31.12.2023. Send a request to obtain new deploy token, if acessing this after gi
 
 ## Usage
 
-Once you have installed **renops-scheduler**, you can use it to schedule and execute Python scripts.
+Once you have installed **renops-scheduler**, you can use it to schedule and execute Python scripts in **CLI**.
 
 To use the program, follow these steps:
 
 1. Open a terminal or command prompt.
-2. Create a new file named `test.py` and write the following content to it:
+2. Create a new file named `test.py` containing:
 
    ```python
+   # Contents of test.py
    print("Hello World!")
    ```
-
-   Save the file in a directory of your choice.
 
 3. Run the following command to execute the script with a deadline of 10 hours:
 
    ```
-   renops-scheduler test.py -d 10
+   renops-scheduler test.py -la -r 6 -d 24
    ```
 
-   This will execute the `test.py` script and find optimal execution window whitin given deadline.
+   This will execute the `test.py` in an optimal window whitin given deadline. 
+   -  `-la` sets automatic location detection (uses soruce IP),
+   - `-r 6` sets runtime (estimated by user), 
+   - `-d 24` sets deadline to 24 hours. 
+
+4. Running scheduler without automatic location detection_
+   ```
+   renops-scheduler test.py -l "Berlin,Germany" -r 6 -d 24
+   ```
+   In cases where user does not want to expose its IP, due to privacy concers, it can manualy specify rough location in a text description. 
+
 
 
 ## Optional arguments
 The program accepts several command-line arguments to customize the execution. Here's an overview of the available options:
 
-The program accepts several command-line arguments to customize the execution. Here's an overview of the available options:
-- `-l LOCATION`, `--location LOCATION`: Specify a location in the format "settlement,country" (e.g., "Berlin, Germany"). If not provided, scheduler automatically detects location based of the IP - (This will be optiononal in future releases)
-- `-r RUNTIME`, `--runtime RUNTIME`: Specify the estimated runtime of given script in hours. The default value is 3 hours.
-- `-d DEADLINE`, `--deadline DEADLINE`: Specify the deadline in hours, by when should the given script be executed. The default value is 120. If deadline is smaller than first feasible interval, the program will execute immediately.
+```
+usage: renops-scheduler [-h] -l LOCATION [-r RUNTIME] [-d DEADLINE] [-v VERBOSE] script_path
+
+positional arguments:
+  script_path           Path to the script to be executed.
+
+options:
+  -h, --help            show this help message and exit
+  -l LOCATION, --location LOCATION
+                        Location can be specified in two ways:
+                        
+                        1. Pass a specific location as a string, e.g., "Berlin, Germany".
+                        
+                        2. Use automatic location detection based on IP address.
+                         By using this tag, you agree that your IP can be used to detect your location.
+                        You can use any of the following values for this purpose:
+                           -l a (-la)
+                           -l auto
+                           -l automatic
+  -r RUNTIME, --runtime RUNTIME
+                        Runtime in hours. (User estimated) - Deafult is 3 hours
+  -d DEADLINE, --deadline DEADLINE
+                        Deadline in hours, by when should script finish running - Default is 120 hours
+  
+```
 
 ## Notes
 
 - **renops-scheduler** is currently in beta version and may contain bugs or limitations.
-- Currently we select the most optimal interval based on limitations, so given script will always execute on full hour
-- The program supports running Python scripts only.
 - Send possible suggestions, bugs and improvements to ***jakob.jenko@xlab.si***
