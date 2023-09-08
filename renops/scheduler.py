@@ -3,8 +3,8 @@
 import argparse
 import subprocess
 import time
-from datetime import datetime
 from argparse import RawTextHelpFormatter
+from datetime import datetime
 
 from renops.datafetcher import DataFetcher
 
@@ -50,16 +50,16 @@ def main():
         "--location",
         default=None,
         help=(
-        'Location can be specified in two ways:\n\n'
-        '1. Pass a specific location as a string, e.g., "Berlin, Germany".\n\n'
-        '2. Use automatic location detection based on IP address.\n'
-        ' By using this tag, you agree that your IP can be used to detect your location.\n'
-        'You can use any of the following values for this purpose:\n'
-        '   -l a (-la)\n'
-        '   -l auto\n'
-        '   -l automatic\n'            
-            ),
-        required=True
+            "Location can be specified in two ways:\n\n"
+            '1. Pass a specific location as a string, e.g., "Berlin, Germany".\n\n'
+            "2. Use automatic location detection based on IP address.\n"
+            " By using this tag, you agree that your IP can be used to detect your location.\n"
+            "You can use any of the following values for this purpose:\n"
+            "   -l a (-la)\n"
+            "   -l auto\n"
+            "   -l automatic\n"
+        ),
+        required=True,
     )
     parser.add_argument(
         "-r", "--runtime", type=int, default=None, help="Runtime in hours."

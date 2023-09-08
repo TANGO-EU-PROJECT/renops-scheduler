@@ -19,17 +19,19 @@ class GeoLocation:
         Returns:
             dict: The parameters for the request.
         """
-        auto_synonyms  = ["auto", "a", "automatic"] # Define synomims for word automatic
-        if isinstance(location, str) and location not in auto_synonyms: # When location is defined as a word 
+        auto_synonyms = ["auto", "a", "automatic"]  # Define synomims for word automatic
+        if (
+            isinstance(location, str) and location not in auto_synonyms
+        ):  # When location is defined as a word
             lat, lon = self._geocode_location(location)
             print(f"Location specified: {location}, lat: {lat} lon: {lon}")
-        elif location in auto_synonyms: # When location is set to auto
+        elif location in auto_synonyms:  # When location is set to auto
             loc = self._get_location()
             print(
                 f'Location is set to auto, IP will be used to detect location! found: {loc["city"]}, {loc["country"]}'
             )
             lat, lon = loc["loc"].split(",")
-        #elif isinstance(location, dict) and "lat" in location and "lon" in location:
+        # elif isinstance(location, dict) and "lat" in location and "lon" in location:
         #    lat, lon = location["lat"], location["lon"]
         #    print(f"Location specified: {location}")
         else:
