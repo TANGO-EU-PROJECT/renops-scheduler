@@ -29,9 +29,9 @@ class GeoLocation:
                 f'Location is set to auto, IP will be used to detect location! found: {loc["city"]}, {loc["country"]}'
             )
             lat, lon = loc["loc"].split(",")
-        elif isinstance(location, dict) and "lat" in location and "lon" in location:
-            lat, lon = location["lat"], location["lon"]
-            print(f"Location specified: {location}")
+        #elif isinstance(location, dict) and "lat" in location and "lon" in location:
+        #    lat, lon = location["lat"], location["lon"]
+        #    print(f"Location specified: {location}")
         else:
             raise ValueError("Invalid location format")
         return {"lat": lat, "lon": lon}
