@@ -49,6 +49,7 @@ def main():
         "--location",
         default=None,
         help="Location in string - 'settlement,country' i.e 'Berlin, Germany')",
+        required=True
     )
     parser.add_argument(
         "-r", "--runtime", type=int, default=None, help="Runtime in hours."
