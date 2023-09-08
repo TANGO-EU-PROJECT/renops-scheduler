@@ -83,7 +83,13 @@ def main():
     fetcher = DataFetcher(url, location=args.location)
     data = fetcher.fetch_data()
 
-    res = data.resample(str(args.runtime) + "H").mean()
+    res = data.resample("2H").agg(
+        {
+            "renewable_potential_forecast_hourly": "mean",
+            "epoch": "first",
+            "timestamps_hourly": "first",
+        }
+    )
     res = res.set_index("epoch")
     res = res.sort_values(by=["renewable_potential_forecast_hourly"], ascending=False)
 
