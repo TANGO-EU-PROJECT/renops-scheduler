@@ -4,6 +4,7 @@ import argparse
 import subprocess
 import time
 from datetime import datetime
+from argparse import RawTextHelpFormatter
 
 from renops.datafetcher import DataFetcher
 
