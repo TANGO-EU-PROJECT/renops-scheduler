@@ -1,6 +1,6 @@
 # renops-scheduler
 
-**renops-scheduler** is a Python package that allows you to schedule and execute Python scripts at time when most renewable energy available. This README provides instructions on how to use the program effectively.
+**renops-scheduler** is a Python package that allows you to schedule and execute Python scripts at time when most renewable energy available.
 
 ## Installation
 
@@ -9,7 +9,7 @@ To install **renops-scheduler**, run the following command:
    ```
     pip install renops-scheduler --index-url https://gitlab+deploy-token-91:auD8AGBN9ZMaWzyV4sKS@gitlab.xlab.si/api/v4/projects/2476/packages/pypi/simple
    ```
-   Command includes deploy token valid until 31.12.2023. Send a request to obtain new deploy token, if acessing this after gi
+   Command includes deploy token valid until 31.12.2023. Send a request to obtain new deploy token, if acessing this after given date.
 
 ## Usage
 
@@ -32,7 +32,7 @@ To use the program, follow these steps:
    ```
 
    This will execute the `test.py` in an optimal window whitin given deadline. 
-   -  `-la` sets automatic location detection (uses soruce IP),
+   -  `-la` sets automatic location detection (uses machines public IP!),
    - `-r 6` sets runtime (estimated by user), 
    - `-d 24` sets deadline to 24 hours. 
 
@@ -40,7 +40,7 @@ To use the program, follow these steps:
    ```
    renops-scheduler test.py -l "Berlin,Germany" -r 6 -d 24
    ```
-   In cases where user does not want to expose its IP, due to privacy concers, it can manualy specify rough location in a text description. 
+   In cases where user does not want to expose its IP, due to privacy concers, we can manualy specify rough location in a text description. 
 
 
 
