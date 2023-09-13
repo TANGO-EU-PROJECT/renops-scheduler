@@ -53,8 +53,7 @@ build and publish pip packages:
     - renops-scheduler test.py -la -r 1 -d 1
   only:
     - main
-  dependencies:
-    - build
+  needs: ["build and publish pip packages"]
  
 
 test packages in py38:
