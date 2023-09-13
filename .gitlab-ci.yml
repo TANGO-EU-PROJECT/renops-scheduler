@@ -46,16 +46,21 @@ build and publish pip packages:
 
 
 # Create an anchor called `&run_test`
-.run_package_test: &run_test
-  - pip install renops-scheduler --index-url https://gitlab+deploy-token-91:auD8AGBN9ZMaWzyV4sKS@gitlab.xlab.si/api/v4/projects/2476/packages/pypi/simple
-  - echo 'print("hello world!")' > test.py
-  - renops-scheduler test.py -la -r 1 -d 1
+.run_test: &run_test
+  script:
+    - pip install renops-scheduler --index-url https://gitlab+deploy-token-91:auD8AGBN9ZMaWzyV4sKS@gitlab.xlab.si/api/v4/projects/2476/packages/pypi/simple
+    - echo 'print("hello world!")' > test.py
+    - renops-scheduler test.py -la -r 1 -d 1
+  # only:
+  #   - main
+  # dependencies:
+  #   - build
+  #  - static-analysis
 
 test packages in py38:
   stage: test
   image: python:3.8.0
-  script:
-    - <<:*run_test
+  <<: *run_test
   # only:
   #   - main
   # dependencies:
@@ -65,8 +70,7 @@ test packages in py38:
 test packages in py39:
   stage: test
   image: python:3.9.0
-  script:
-    - <<:*run_test
+  <<: *run_test
   # only:
   #   - main
   # dependencies:
@@ -76,8 +80,7 @@ test packages in py39:
 test packages in py310:
   stage: test
   image: python:3.10.0
-  script:
-    - <<:*run_test
+  <<: *run_test
   # only:
   #   - main
   # dependencies:
@@ -87,8 +90,7 @@ test packages in py310:
 test packages in py311:
   stage: test
   image: python:3.11.0
-  script:
-    - <<:*run_test
+  <<: *run_test
   # only:
   #   - main
   # dependencies:
