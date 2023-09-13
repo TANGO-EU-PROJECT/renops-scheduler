@@ -91,15 +91,3 @@ test packages py311:
   #   - main
   # dependencies:
   #   - build
-
-test packages py312:
-  stage: test
-  image: python:3.12.0
-  script:
-    - pip install renops-scheduler --index-url https://gitlab+deploy-token-91:auD8AGBN9ZMaWzyV4sKS@gitlab.xlab.si/api/v4/projects/2476/packages/pypi/simple
-    - echo 'print("hello world!")' > test.py
-    - renops-scheduler test.py -la -r 1 -d 1 
-  # only:
-  #   - main
-  # dependencies:
-  #   - build
