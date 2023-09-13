@@ -49,7 +49,7 @@ build and publish pip packages:
 .run_package_test: &run_test
   - pip install renops-scheduler --index-url https://gitlab+deploy-token-91:auD8AGBN9ZMaWzyV4sKS@gitlab.xlab.si/api/v4/projects/2476/packages/pypi/simple
   - echo 'print("hello world!")' > test.py
-  - renops-scheduler test.py -la -r 1 -d 1 
+  - renops-scheduler test.py -la -r 1 -d 1
 
 test packages in py38:
   stage: test
@@ -94,4 +94,3 @@ test packages in py311:
   # dependencies:
   #   - build
   #  - static-analysis
-
