@@ -68,7 +68,7 @@ test packages py39:
   # dependencies:
   #   - build
 
-  test packages py310:
+test packages py310:
   stage: test
   image: python:3.10.0
   script:
@@ -80,7 +80,7 @@ test packages py39:
   # dependencies:
   #   - build
 
-  test packages py311:
+test packages py311:
   stage: test
   image: python:3.11.0
   script:
@@ -92,7 +92,7 @@ test packages py39:
   # dependencies:
   #   - build
 
-  test packages py312:
+test packages py312:
   stage: test
   image: python:3.12.0
   script:
