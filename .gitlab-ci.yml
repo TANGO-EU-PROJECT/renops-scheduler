@@ -3,7 +3,8 @@ default:
 
 stages:
     - static-analysis
-    - build pip
+    - build
+    - test
 
 isort:
     stage: static-analysis
@@ -26,7 +27,7 @@ flake8:
     allow_failure: true
 
 build and publish pip packages:
-  stage: build pip
+  stage: build
   script:
     - python -V
     - pip install virtualenv
@@ -42,5 +43,39 @@ build and publish pip packages:
     paths:
       - dist/*.whl
     expire_in: 2 days
- # only:
-  #  - production
+
+
+# Create an anchor called `&run_test`
+.run_test: &run_test
+  script:
+    - pip install renops-scheduler --index-url https://${CI_DEPLOY_TOKEN_USER}:${CI_DEPLOY_TOKEN}@gitlab.xlab.si/api/v4/projects/2476/packages/pypi/simple
+    - echo 'print("hello world!")' > test.py
+    - renops-scheduler test.py -la -r 1 -d 1
+  only:
+    - main
+  needs: ["build and publish pip packages"]
+ 
+
+test packages in py38:
+  stage: test
+  image: python:3.8.0
+  <<: *run_test
+
+
+test packages in py39:
+  stage: test
+  image: python:3.9.0
+  <<: *run_test
+
+
+test packages in py310:
+  stage: test
+  image: python:3.10.0
+  <<: *run_test
+
+
+test packages in py311:
+  stage: test
+  image: python:3.11.0
+  <<: *run_test
+
