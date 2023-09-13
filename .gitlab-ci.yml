@@ -44,9 +44,20 @@ build and publish pip packages:
       - dist/*.whl
     expire_in: 2 days
 
-test packages py37:
+test packages py38:
   stage: test
-  image: python:3.7.0
+  image: python:3.8.0
+  script:
+    - pip install renops-scheduler --index-url https://gitlab+deploy-token-91:auD8AGBN9ZMaWzyV4sKS@gitlab.xlab.si/api/v4/projects/2476/packages/pypi/simple
+    - renops-scheduler test.py -la -r 1 -d 1 
+  # only:
+  #   - main
+  # dependencies:
+  #   - build
+
+test packages py39:
+  stage: test
+  image: python:3.9.0
   script:
     - pip install renops-scheduler --index-url https://gitlab+deploy-token-91:auD8AGBN9ZMaWzyV4sKS@gitlab.xlab.si/api/v4/projects/2476/packages/pypi/simple
     - renops-scheduler test.py -la -r 1 -d 1 
