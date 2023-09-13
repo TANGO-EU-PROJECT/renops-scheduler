@@ -59,6 +59,7 @@ test packages:
 py38:
   stage: test
   image: python:3.8.0
+  only:
     - test
 
 py39:
