@@ -21,10 +21,10 @@ $ python3 --version
 To install **renops-scheduler**, run the following command:
 
 ```bash
-$ pip install renops-scheduler --index-url https://gitlab+deploy-token-91:auD8AGBN9ZMaWzyV4sKS@gitlab.xlab.si/api/v4/projects/2476/packages/pypi/simple
+$ pip install renops-scheduler --index-url https://tango:Nxi3tSRWNzxFpyAxdATv@gitlab.xlab.si/api/v4/projects/2476/packages/pypi/simple
 ```
 
-> **_NOTE:_** Command includes deploy token valid until 31.12.2023. Send a request to obtain a new deploy token, if accessing this after the given date.
+> **_NOTE:_** Command includes deploy token valid until 31.12.2024. Send a request to obtain a new deploy token, if accessing this after the given date.
 
 ## Usage
 
