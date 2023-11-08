@@ -109,7 +109,8 @@ class Scheduler():
         self._extract_epochs()
         filtered_res = self._filter_samples(res)
 
-        if self.v: print("Task has to be finished by: ", to_datetime(self.deadline_epoch))
+        if self.v:
+            print("Task has to be finished by: ", to_datetime(self.deadline_epoch))
 
         if len(filtered_res) <= 1:
             renewables_now = self._get_current_renewables(data)
@@ -144,6 +145,8 @@ class Scheduler():
 
         wait_until(optimal_time)
 
-        if self.v: print(f"Executing action now at {datetime.now()}")
-        if self.v: print("----------------------------------------------------")
+        if self.v:
+            print(f"Executing action now at {datetime.now()}")
+        if self.v:
+            print("----------------------------------------------------")
         self.action(*self.argument, **self.kwargs)
