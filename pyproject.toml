@@ -27,4 +27,4 @@ dependencies = [
 renops-scheduler = "renops.scheduler:main"
 
 [tool.setuptools]
-package-dir = {"" = "src"}
+package-dir = {"" = "renops"}
