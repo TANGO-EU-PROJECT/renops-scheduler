@@ -1,10 +1,7 @@
-#!/usr/bin/env python3
-
-import argparse
 import subprocess
 import time
-from argparse import RawTextHelpFormatter
 from datetime import datetime
+from typing import Callable, Tuple, Union
 
 from renops.datafetcher import DataFetcher
 
@@ -15,7 +12,7 @@ def parse_time(time_string):
 
 def wait_until(target_time):
     while int(time.time()) < target_time:
-        time.sleep(5)  # Sleep for a bit to not hog the CPU
+        time.sleep(50)  # Sleep for a bit to not hog the CPU
 
 
 def execute_script(script_path):
@@ -41,106 +38,115 @@ def to_datetime(epoch):
     return datetime.fromtimestamp(epoch).strftime("%Y-%d-%m %H:%M:%S")
 
 
-def main():
-    print("RUNNING RENOPS SCHEDULER...")
-    parser = argparse.ArgumentParser(formatter_class=RawTextHelpFormatter)
-    parser.add_argument("script_path", help="Path to the script to be executed.")
-    parser.add_argument(
-        "-l",
-        "--location",
-        default=None,
-        help=(
-            "Location can be specified in two ways:\n\n"
-            '1. Pass a specific location as a string, e.g., "Berlin, Germany".\n\n'
-            "2. Use automatic location detection based on IP address.\n"
-            " By using this tag, you agree that your IP can be used to detect your location.\n"
-            "You can use any of the following values for this purpose:\n"
-            "   -l a (-la)\n"
-            "   -l auto\n"
-            "   -l automatic\n"
-        ),
-        required=True,
-    )
-    parser.add_argument(
-        "-r", "--runtime", type=int, default=None, help="Runtime in hours."
-    )
-    parser.add_argument(
-        "-d",
-        "--deadline",
-        type=int,
-        default=120,
-        help="Deadline in hours, by when should script finish running",
-    )
-    parser.add_argument("-v", "--verbose", type=int, default=None, help="Verbose mode.")
+class Scheduler():
 
-    args = parser.parse_args()
+    def __init__(self,
+                 deadline: int,
+                 runtime: int,
+                 location: str,
+                 verbose: bool,
+                 action: Callable,
+                 argument: Tuple[Union[int, str], ...] = (),
+                 kwargs: Union[dict, None] = {},
+                 ) -> None:
+        self.deadline = deadline
+        self.runtime = runtime
+        self.location = location
+        self.v = verbose
+        self.action = action
+        self.argument = argument
+        self.kwargs = kwargs
 
-    if not args.runtime:
-        print("Runtime not specified, using default setting of 3 hours!")
-        args.runtime = 3
+    def get_data(self):
+        url = "https://renops-api-tango.xlab.si/forecast/renewable_potential"
+        fetcher = DataFetcher(url, location=self.location)
+        data = fetcher.fetch_data()
 
-    url = "https://renops-api-tango.xlab.si/forecast/renewable_potential"
-    fetcher = DataFetcher(url, location=args.location)
-    data = fetcher.fetch_data()
+        return data
 
-    res = data.resample("2H").agg(
-        {
+    def _preprocess_data(self, data):
+
+        # Resample to 2H buckets
+        res = data.resample("2H").agg({
             "renewable_potential_forecast_hourly": "mean",
             "epoch": "first",
             "timestamps_hourly": "first",
-        }
-    )
-    res = res.set_index("epoch")
-    res = res.sort_values(by=["renewable_potential_forecast_hourly"], ascending=False)
+        })
 
-    current_epoch = int(time.time())
-    deadline_epoch = current_epoch + hour_to_second(args.deadline)
-    start_execution_epoch = deadline_epoch - hour_to_second(args.runtime)
+        # Sort to minimise renewable potential
+        res = res.set_index("epoch")
+        res = res.sort_values(by=["renewable_potential_forecast_hourly"], ascending=False)
 
-    print("Task has to be finished by: ", to_datetime(deadline_epoch))
-    filtered_res = res[
-        (res.index >= current_epoch) & (res.index <= start_execution_epoch)
-    ]
-    filtered_res = filtered_res.loc[res.renewable_potential_forecast_hourly != 0]
-    # Here you would call the function to get the optimal time, using the location, runtime and deadline
-    # For now, let's just use the deadline time.
+        return res
 
-    if len(filtered_res) <= 1:
-        optimal_time = current_epoch
+    def _extract_epochs(self):
+        self.current_epoch = int(time.time())
+        self.deadline_epoch = self.current_epoch + hour_to_second(self.deadline)
+        self.start_execution_epoch = self.deadline_epoch - hour_to_second(self.runtime)
 
-        renewables_now = data[data.epoch >= optimal_time]
+        return None
+
+    def _filter_samples(self, res):
+        filtered_res = res[
+            (res.index >= self.current_epoch) & (res.index <= self.start_execution_epoch)
+        ]
+        filtered_res = filtered_res.loc[res.renewable_potential_forecast_hourly != 0]
+
+        return filtered_res
+
+    def _get_current_renewables(self, data):
+        renewables_now = data[data.epoch >= self.current_epoch]
         renewables_now = renewables_now.renewable_potential_forecast_hourly.values[
             0
         ].round(2)
-        filtered_res[int(time.time())] = renewables_now
-        print("No renewable window whitin given deadline!")
-        print(f"Current renewable potential is: {renewables_now}")
-    else:
-        optimal_time = filtered_res.index[0]
 
-        diff_seconds = optimal_time - current_epoch
-        wait_hours = convert_seconds_to_hour(diff_seconds)
-        wait_minutes = convert_seconds_to_minutes(diff_seconds)
+        return renewables_now
 
-        print(
-            "Found optimal time between ",
-            to_datetime(filtered_res.index[0]),
-            "and",
-            to_datetime(filtered_res.index[0] + hour_to_second(args.runtime)),
-        )
-        print(
-            "Renewable potential at that time is:",
-            filtered_res.renewable_potential_forecast_hourly.values[0].round(2),
-        )
-        print(
-            f"Waiting for {wait_hours} h {wait_minutes} min to execute {args.script_path}..."
-        )
+    def run(self):
 
-    wait_until(optimal_time)
-    print(f"Executing {args.script_path} now at {datetime.now()}")
-    print("----------------------------------------------------")
-    execute_script(args.script_path)
+        data = self.get_data()
+        res = self._preprocess_data(data)
+        self._extract_epochs()
+        filtered_res = self._filter_samples(res)
 
+        if self.v:
+            print("Task has to be finished by: ", to_datetime(self.deadline_epoch))
 
-if __name__ == "__main__":
-    main()
+        if len(filtered_res) <= 1:
+            renewables_now = self._get_current_renewables(data)
+            filtered_res[self.current_epoch] = renewables_now
+            optimal_time = self.current_epoch
+
+            if self.v:
+                print("No renewable window whitin a given deadline!")
+                print(f"Current renewable potential is: {renewables_now}")
+
+        else:
+            optimal_time = filtered_res.index[0]
+            diff_seconds = optimal_time - self.current_epoch
+
+            if self.v:
+                print(
+                    "Found optimal time between ",
+                    to_datetime(filtered_res.index[0]),
+                    "and",
+                    to_datetime(filtered_res.index[0] + hour_to_second(self.runtime)),
+                )
+                print(
+                    "Renewable potential at that time is:",
+                    filtered_res.renewable_potential_forecast_hourly.values[0].round(2),
+                )
+                print(
+                    f"Waiting for"
+                    f" {convert_seconds_to_hour(diff_seconds)} h"
+                    f" {convert_seconds_to_minutes(diff_seconds)} min"
+                    f"..."
+                )
+
+        wait_until(optimal_time)
+
+        if self.v:
+            print(f"Executing action now at {datetime.now()}")
+        if self.v:
+            print("----------------------------------------------------")
+        self.action(*self.argument, **self.kwargs)

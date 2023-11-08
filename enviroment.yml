@@ -1,4 +1,4 @@
-name: renops
+name: renops-scheduler
 dependencies:
   - python==3.11.3
   - pip==23.1.2
