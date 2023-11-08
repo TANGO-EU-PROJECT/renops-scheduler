@@ -15,7 +15,7 @@ def parse_time(time_string):
 
 def wait_until(target_time):
     while int(time.time()) < target_time:
-        time.sleep(5)  # Sleep for a bit to not hog the CPU
+        time.sleep(50)  # Sleep for a bit to not hog the CPU
 
 
 def execute_script(script_path):
