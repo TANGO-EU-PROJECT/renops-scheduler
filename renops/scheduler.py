@@ -2,8 +2,9 @@ import subprocess
 import time
 from datetime import datetime
 from typing import Callable, Tuple, Union
-from renops.datafetcher import DataFetcher
+
 import renops.config as conf
+from renops.datafetcher import DataFetcher
 
 
 def parse_time(time_string):

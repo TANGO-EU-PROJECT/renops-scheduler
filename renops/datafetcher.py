@@ -5,9 +5,8 @@ from typing import Any, Dict, Optional, Union
 import pandas as pd
 import requests
 
-from renops.geolocation import GeoLocation
-
 import renops.config as conf
+from renops.geolocation import GeoLocation
 
 
 def generate_hash(seed: str) -> str:
