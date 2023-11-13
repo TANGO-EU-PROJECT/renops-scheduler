@@ -2,15 +2,14 @@ from typing import Any, Dict, Tuple, Union
 
 import requests
 
+import renops.config as conf
+
 
 class GeoLocation:
     def __init__(self, location: Union[str, Dict[str, float]] = None):
-        self.url = "https://ipinfo.io/json"
         self.params = self._get_location_params(location)
 
-    def _get_location_params(
-        self, location: Union[None, str, Dict[str, float]]
-    ) -> Dict[str, Any]:
+    def _get_location_params(self, location: Union[None, str, Dict[str, float]]) -> Dict[str, Any]:
         """
         Returns the parameters based on the provided location (city name or coordinates).
         Args:
@@ -20,16 +19,17 @@ class GeoLocation:
             dict: The parameters for the request.
         """
         auto_synonyms = ["auto", "a", "automatic"]  # Define synomims for word automatic
-        if (
-            isinstance(location, str) and location not in auto_synonyms
-        ):  # When location is defined as a word
+        if isinstance(location, str) and location not in auto_synonyms:  # When location is defined as a word
             lat, lon = self._geocode_location(location)
-            print(f"Location specified: {location}, lat: {lat} lon: {lon}")
+            if conf.runtime.verbose:
+                print(f"Location specified: {location}, lat: {lat} lon: {lon}")
         elif location in auto_synonyms:  # When location is set to auto
             loc = self._get_location()
-            print(
-                f'Location is set to auto, IP will be used to detect location! found: {loc["city"]}, {loc["country"]}'
-            )
+            if conf.runtime.verbose:
+                print(
+                    f'Location is set to auto, IP will be used to detect location! found: {loc["city"]},'
+                    f' {loc["country"]}'
+                )
             lat, lon = loc["loc"].split(",")
         # elif isinstance(location, dict) and "lat" in location and "lon" in location:
         #    lat, lon = location["lat"], location["lon"]
@@ -46,9 +46,7 @@ class GeoLocation:
         Returns:
             tuple: The latitude and longitude values.
         """
-        response = requests.get(
-            f"https://nominatim.openstreetmap.org/search?q={location}&format=json"
-        )
+        response = requests.get(f"https://nominatim.openstreetmap.org/search?q={location}&format=json")
         # Check if the API request was successful
         if response.status_code == 200:
             data = response.json()
@@ -82,6 +80,6 @@ class GeoLocation:
         """
 
         # Send GET request to 'ipinfo.io' to fetch geolocation data
-        response = requests.get(self.url)
+        response = requests.get(conf.endpoint.geocoder)
         # Convert the response to JSON and return it
         return response.json()
