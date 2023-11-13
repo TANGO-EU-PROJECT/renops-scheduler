@@ -7,6 +7,8 @@ import requests
 
 from renops.geolocation import GeoLocation
 
+import renops.config as conf
+
 
 def generate_hash(seed: str) -> str:
     """
@@ -31,7 +33,7 @@ def generate_hash(seed: str) -> str:
 
 
 class DataFetcher:
-    def __init__(self, url: str, location: Union[str, Dict[str, float]] = None):
+    def __init__(self, location: Union[str, Dict[str, float]] = None):
         """
         Initialize the DataFetcher class.
         Args:
@@ -39,7 +41,7 @@ class DataFetcher:
             location (Union[str, Dict[str, float]]): The location, either as a string (city name) or as coordinates
                 (latitude and longitude).
         """
-        self.url = url
+        self.url = conf.endpoint.renops
         self.params = GeoLocation(location).params
 
     def fetch_data(self) -> Optional[Dict[str, Any]]:

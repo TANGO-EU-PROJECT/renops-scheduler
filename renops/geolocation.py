@@ -1,11 +1,11 @@
 from typing import Any, Dict, Tuple, Union
 
 import requests
+import renops.config as conf
 
 
 class GeoLocation:
     def __init__(self, location: Union[str, Dict[str, float]] = None):
-        self.url = "https://ipinfo.io/json"
         self.params = self._get_location_params(location)
 
     def _get_location_params(
@@ -24,10 +24,10 @@ class GeoLocation:
             isinstance(location, str) and location not in auto_synonyms
         ):  # When location is defined as a word
             lat, lon = self._geocode_location(location)
-            print(f"Location specified: {location}, lat: {lat} lon: {lon}")
+            if conf.runtime.verbose: print(f"Location specified: {location}, lat: {lat} lon: {lon}")
         elif location in auto_synonyms:  # When location is set to auto
             loc = self._get_location()
-            print(
+            if conf.runtime.verbose: print(
                 f'Location is set to auto, IP will be used to detect location! found: {loc["city"]}, {loc["country"]}'
             )
             lat, lon = loc["loc"].split(",")
@@ -82,6 +82,6 @@ class GeoLocation:
         """
 
         # Send GET request to 'ipinfo.io' to fetch geolocation data
-        response = requests.get(self.url)
+        response = requests.get(conf.endpoint.geocoder)
         # Convert the response to JSON and return it
         return response.json()

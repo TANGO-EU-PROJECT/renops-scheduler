@@ -2,8 +2,8 @@ import subprocess
 import time
 from datetime import datetime
 from typing import Callable, Tuple, Union
-
 from renops.datafetcher import DataFetcher
+import renops.config as conf
 
 
 def parse_time(time_string):
@@ -12,7 +12,7 @@ def parse_time(time_string):
 
 def wait_until(target_time):
     while int(time.time()) < target_time:
-        time.sleep(50)  # Sleep for a bit to not hog the CPU
+        time.sleep(conf.runtime.sleep_seconds)  # Sleep for a bit to not hog the CPU
 
 
 def execute_script(script_path):
@@ -58,8 +58,7 @@ class Scheduler():
         self.kwargs = kwargs
 
     def get_data(self):
-        url = "https://renops-api-tango.xlab.si/forecast/renewable_potential"
-        fetcher = DataFetcher(url, location=self.location)
+        fetcher = DataFetcher(location=self.location)
         data = fetcher.fetch_data()
 
         return data
