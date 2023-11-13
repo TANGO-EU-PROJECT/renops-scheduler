@@ -55,7 +55,30 @@ To use the program, follow these steps:
     ```bash
     $ renops-scheduler test.py -l "Berlin,Germany" -r 6 -d 24
     ```    
-    In cases where a user **does not want to expose its IP**, due to privacy concerns, we can manually specify a rough location in a text description. 
+    In cases where a user **does not want to expose its IP**, due to privacy concerns, we can manually specify a rough location in a text description.
+
+### Import Example
+```python
+from renops.scheduler import Scheduler
+
+# Define a function with an argument that scheduler will execute
+def test_run(a, text: str):
+    print("OK")
+    print("Passed keyword argument", text)
+    print("Passed argument a:", a)
+
+# Intialise the scheduler
+s = Scheduler(runtime=1,
+              deadline=1,
+              location="Kranj",
+              verbose=False,
+              action=test_run,
+              argument=([1]),
+              kwargs={"text": "Scheduler test!"})
+
+# Run the scheduler
+s.run()
+```
 
 ## Optional arguments
 The program accepts several command-line arguments to customize the execution. Here's an overview of the available options:
