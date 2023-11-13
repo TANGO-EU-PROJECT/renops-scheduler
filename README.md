@@ -63,7 +63,7 @@ from renops.scheduler import Scheduler
 
 # Define a function with an argument that scheduler will execute
 def test_run(a, text: str):
-    print("OK")
+    print("Hello World!")
     print("Passed keyword argument", text)
     print("Passed argument a:", a)
 
