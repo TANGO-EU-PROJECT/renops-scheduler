@@ -42,7 +42,7 @@ To use the program, follow these steps:
 3. Run the following command to execute the script with a deadline of 24 hours:
 
     ```bash
-    $ renops-scheduler test.py -la -r 6 -d 24
+    $ renops-scheduler test.py -la -r 6 -d 24 -v
     ```
 
     This will execute the `test.py` in an optimal window within the given deadline. 
@@ -53,7 +53,7 @@ To use the program, follow these steps:
 
 4. Running scheduler without automatic location detection:
     ```bash
-    $ renops-scheduler test.py -l "Berlin,Germany" -r 6 -d 24
+    $ renops-scheduler test.py -l "Berlin,Germany" -r 6 -d 24 -v
     ```    
     In cases where a user **does not want to expose its IP**, due to privacy concerns, we can manually specify a rough location in a text description.
 
@@ -64,17 +64,21 @@ from renops.scheduler import Scheduler
 # Define a function with an argument that scheduler will execute
 def test_run(a, text: str):
     print("Hello World!")
+<<<<<<< README.md
+    print("Passed keyword argument: ", text)
+=======
     print("Passed keyword argument", text)
+>>>>>>> README.md
     print("Passed argument a:", a)
 
 # Intialise the scheduler
 s = Scheduler(runtime=1,
               deadline=1,
               location="Kranj",
-              verbose=False,
+              verbose=True,
               action=test_run,
-              argument=([1]),
-              kwargs={"text": "Scheduler test!"})
+              argument=([42]),
+              kwargs={"text": "Scheduler Test!"})
 
 # Run the scheduler
 s.run()
@@ -106,7 +110,7 @@ options:
                         Runtime in hours. (User estimated) - Deafult is 3 hours
   -d DEADLINE, --deadline DEADLINE
                         Deadline in hours, by when should script finish running - Default is 120 hours
-  
+  -v, --verbose         Verbose mode.
 ```
 ## Privacy
 

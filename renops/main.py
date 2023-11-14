@@ -34,7 +34,7 @@ def main():
         default=120,
         help="Deadline in hours, by when should script finish running",
     )
-    parser.add_argument("-v", "--verbose", type=bool, default=True, help="Verbose mode.")
+    parser.add_argument("-v", "--verbose", action="store_true", help="Verbose mode.")
 
     args = parser.parse_args()
 
