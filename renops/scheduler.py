@@ -102,8 +102,11 @@ class Scheduler():
 
         return renewables_now
 
-    def run(self):
+    def _update_global_config(self):
+        conf.runtime.set_verbose(self.v)
 
+    def run(self):
+        self._update_global_config()
         data = self.get_data()
         res = self._preprocess_data(data)
         self._extract_epochs()

@@ -6,3 +6,7 @@ class endpoint:
 class runtime:
     verbose = False
     sleep_seconds = 10
+
+    @classmethod
+    def set_verbose(cls, value):
+        cls.verbose = value
