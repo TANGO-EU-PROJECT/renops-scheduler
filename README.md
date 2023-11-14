@@ -64,12 +64,8 @@ from renops.scheduler import Scheduler
 # Define a function with an argument that scheduler will execute
 def test_run(a, text: str):
     print("Hello World!")
-<<<<<<< README.md
-    print("Passed keyword argument: ", text)
-=======
-    print("Passed keyword argument", text)
->>>>>>> README.md
-    print("Passed argument a:", a)
+    print("Passed keyword argument:", text)
+    print("Passed argument:", a)
 
 # Intialise the scheduler
 s = Scheduler(runtime=1,
