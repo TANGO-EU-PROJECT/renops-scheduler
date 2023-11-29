@@ -19,11 +19,13 @@ class GeoLocation:
             dict: The parameters for the request.
         """
         auto_synonyms = ["auto", "a", "automatic"]  # Define synomims for word automatic
-        if isinstance(location, str) and location not in auto_synonyms:  # When location is defined as a word
+        if isinstance(location, str) and location not in auto_synonyms:
+            # When location is defined as a word
             lat, lon = self._geocode_location(location)
             if conf.runtime.verbose:
                 print(f"Location specified: {location}, lat: {lat} lon: {lon}")
-        elif location in auto_synonyms:  # When location is set to auto
+        elif location in auto_synonyms:
+            # When location is set to auto
             loc = self._get_location()
             if conf.runtime.verbose:
                 print(
@@ -46,7 +48,7 @@ class GeoLocation:
         Returns:
             tuple: The latitude and longitude values.
         """
-        response = requests.get(f"https://nominatim.openstreetmap.org/search?q={location}&format=json")
+        response = requests.get(f"{conf.geocoder.url}/search?q={location}&format=json")
         # Check if the API request was successful
         if response.status_code == 200:
             data = response.json()
@@ -80,6 +82,6 @@ class GeoLocation:
         """
 
         # Send GET request to 'ipinfo.io' to fetch geolocation data
-        response = requests.get(conf.endpoint.geocoder)
+        response = requests.get(conf.ipinfo.url)
         # Convert the response to JSON and return it
         return response.json()
