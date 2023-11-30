@@ -51,6 +51,14 @@ To use the program, follow these steps:
     - `-r 6` sets runtime (estimated by user), 
     - `-d 24` sets the deadline to 24 hours. 
 
+3. Scheduler can also find interval with minimal energy price:
+
+    ```bash
+    $ renops-scheduler test.py -la -r 6 -d 24 -v --optimise-price
+    ```
+
+    This is achieved by adding `--optimise-price` flag.
+
 4. Running scheduler without automatic location detection:
     ```bash
     $ renops-scheduler test.py -l "Berlin,Germany" -r 6 -d 24 -v
@@ -72,6 +80,7 @@ s = Scheduler(runtime=1,
               deadline=1,
               location="Kranj",
               verbose=True,
+              optimise_price=True,
               action=test_run,
               argument=([42]),
               kwargs={"text": "Scheduler Test!"})
@@ -80,7 +89,7 @@ s = Scheduler(runtime=1,
 s.run()
 ```
 
-## Optional arguments
+## Arguments
 The program accepts several command-line arguments to customize the execution. Here's an overview of the available options:
 
 ```
@@ -106,6 +115,8 @@ options:
                         Runtime in hours. (User estimated) - Deafult is 3 hours
   -d DEADLINE, --deadline DEADLINE
                         Deadline in hours, by when should script finish running - Default is 120 hours
+  -op, --optimise-price
+                        Optimise for energy price.
   -v, --verbose         Verbose mode.
 ```
 ## Privacy
