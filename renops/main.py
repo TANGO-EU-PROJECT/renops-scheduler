@@ -58,7 +58,7 @@ def run():
     args = parser.parse_args()
 
     if args.optimise_price:
-        print("Optimising for price! (Currenly 24-48h forecast is available )")
+        print("Optimising for price! (Day-ahead forecast only)")
 
     if not args.runtime:
         print("Runtime not specified, using default setting of 3 hours!")
