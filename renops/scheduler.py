@@ -45,8 +45,9 @@ class Scheduler():
                  deadline: int,
                  runtime: int,
                  location: str,
-                 verbose: bool,
                  action: Callable,
+                 verbose: bool = False,
+                 optimise_price: bool = False,
                  argument: Tuple[Union[int, str], ...] = (),
                  kwargs: Union[dict, None] = {},
                  ) -> None:
@@ -54,28 +55,30 @@ class Scheduler():
         self.runtime = runtime
         self.location = location
         self.v = verbose
+        self.optimise_price = optimise_price
         self.action = action
         self.argument = argument
         self.kwargs = kwargs
 
     def get_data(self):
         fetcher = DataFetcher(location=self.location)
-        data = fetcher.fetch_data()
-
-        return data
+        return fetcher.fetch(self.optimise_price)
 
     def _preprocess_data(self, data):
 
         # Resample to 2H buckets
         res = data.resample("2H").agg({
-            "renewable_potential_forecast_hourly": "mean",
+            "metric": "mean",
             "epoch": "first",
             "timestamps_hourly": "first",
         })
 
         # Sort to minimise renewable potential
         res = res.set_index("epoch")
-        res = res.sort_values(by=["renewable_potential_forecast_hourly"], ascending=False)
+
+        ascending = True if self.optimise_price else False
+
+        res = res.sort_values(by=["metric"], ascending=ascending)
 
         return res
 
@@ -90,13 +93,13 @@ class Scheduler():
         filtered_res = res[
             (res.index >= self.current_epoch) & (res.index <= self.start_execution_epoch)
         ]
-        filtered_res = filtered_res.loc[res.renewable_potential_forecast_hourly != 0]
+        filtered_res = filtered_res.loc[res.metric != 0]
 
         return filtered_res
 
     def _get_current_renewables(self, data):
         renewables_now = data[data.epoch >= self.current_epoch]
-        renewables_now = renewables_now.renewable_potential_forecast_hourly.values[
+        renewables_now = renewables_now.metric.values[
             0
         ].round(2)
 
@@ -109,7 +112,7 @@ class Scheduler():
         self._update_global_config()
         data = self.get_data()
         res = self._preprocess_data(data)
-        self._extract_epochs()
+        self._extract_epochs()  # extract deadilnes runtimes etc TODO
         filtered_res = self._filter_samples(res)
 
         if self.v:
@@ -135,10 +138,17 @@ class Scheduler():
                     "and",
                     to_datetime(filtered_res.index[0] + hour_to_second(self.runtime)),
                 )
-                print(
-                    "Renewable potential at that time is:",
-                    filtered_res.renewable_potential_forecast_hourly.values[0].round(2),
-                )
+                if self.optimise_price:
+                    print(
+                        "Energy price at that time is:",
+                        filtered_res.metric.values[0].round(2),
+                        " EUR/MWh",
+                    )
+                else:
+                    print(
+                        "Renewable potential at that time is:",
+                        filtered_res.metric.values[0].round(2),
+                    )
                 print(
                     f"Waiting for"
                     f" {convert_seconds_to_hour(diff_seconds)} h"

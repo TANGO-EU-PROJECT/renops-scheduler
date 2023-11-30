@@ -50,7 +50,8 @@ build and publish pip packages:
   script:
     - pip install renops-scheduler --index-url https://${CI_DEPLOY_TOKEN_USER}:${CI_DEPLOY_TOKEN}@gitlab.xlab.si/api/v4/projects/2476/packages/pypi/simple
     - echo 'print("hello world!")' > test.py
-    - renops-scheduler test.py -la -r 1 -d 1
+    - renops-scheduler test.py -la -r 1 -d 1 # Test renewable potential
+    - renops-scheduler test.py -la -r 1 -d 1 --optimise-price # Test prices
   only:
     - main
   needs: ["build and publish pip packages"]
