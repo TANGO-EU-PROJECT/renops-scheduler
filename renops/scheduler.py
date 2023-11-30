@@ -142,7 +142,7 @@ class Scheduler():
                     print(
                         "Energy price at that time is:",
                         filtered_res.metric.values[0].round(2),
-                        " EUR/MWh",
+                        "EUR/MWh",
                     )
                 else:
                     print(
