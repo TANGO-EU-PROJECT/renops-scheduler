@@ -93,4 +93,9 @@ class DataFetcher:
 
         except requests.exceptions.RequestException as e:
             print("Error occurred:", str(e))
+            if "422" in str(e):
+                print(
+                    "Could not map a bidding zone to given coordinate. "
+                    "Check (https://www.entsoe.eu/network_codes/bzr/) for more details."
+                    )
             sys.exit(1)
