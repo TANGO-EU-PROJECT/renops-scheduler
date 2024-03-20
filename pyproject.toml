@@ -28,3 +28,6 @@ renops-scheduler = "renops.main:main"
 
 [tool.setuptools]
 package-dir = {"" = "renops"}
+
+[tool.hatch.build.targets.wheel]
+packages = ["renops"]
