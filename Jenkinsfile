@@ -9,17 +9,16 @@ pipeline {
         skipDefaultCheckout() 
     }
 
+    environment {
+    BRANCH_NAME = "main"
+    }
+
     stages {
         
         stage('Checkout') {
           steps {
               echo 'Checkout SCM'
               checkout scm
-              checkout([$class: 'GitSCM',
-                        branches: [[name: env.BRANCH_NAME]],
-                        extensions: [[$class: 'CleanBeforeCheckout']],
-                        userRemoteConfigs: scm.userRemoteConfigs
-              ])
             }
         }
 
