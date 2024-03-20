@@ -9,13 +9,24 @@ pipeline {
         skipDefaultCheckout() 
     }
 
-    
     stages {
         
-        stage("Test"){
-            steps {
+        stage('Checkout') {
+          steps {
+              echo 'Checkout SCM'
+              checkout scm
+              checkout([$class: 'GitSCM',
+                        branches: [[name: env.BRANCH_NAME]],
+                        extensions: [[$class: 'CleanBeforeCheckout']],
+                        userRemoteConfigs: scm.userRemoteConfigs
+              ])
+            }
+        }
+
+        stage("Build"){
+            steps{
                 script {
-                    echo "Testing"
+                    echo "Building"
                     sh "ls -all"
                     sh "python -V"
                     sh "pip install virtualenv"
@@ -23,6 +34,14 @@ pipeline {
                     sh "source venv/bin/activate"
                     sh "pip install build"
                     sh "python -m build"
+                }
+            }
+        }
+
+        stage("Test"){
+            steps {
+                script {
+                    echo "Testing"
                     sh "pip install ."
                     sh 'pip install pytest'
                     sh 'python -m pytest'
