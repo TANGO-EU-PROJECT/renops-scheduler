@@ -16,6 +16,7 @@ pipeline {
             steps {
                 script {
                     echo "Testing"
+                    sh "ls -all"
                     sh "python -V"
                     sh "pip install virtualenv"
                     sh "virtualenv venv"
