@@ -16,7 +16,13 @@ pipeline {
             steps {
                 script {
                     echo "Testing"
-                    sh "pip install -e ."
+                    sh "python -V"
+                    sh "pip install virtualenv"
+                    sh "virtualenv venv"
+                    sh "source venv/bin/activate"
+                    sh "pip install build"
+                    sh "python -m build"
+                    sh "pip install ."
                     sh 'pip install pytest'
                     sh 'python -m pytest'
                 }
