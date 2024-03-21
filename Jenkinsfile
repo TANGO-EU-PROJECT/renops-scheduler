@@ -33,7 +33,14 @@ pipeline {
               checkout scm
             }
         }
-
+        stage("Clean"){
+            steps{
+                script {
+                    echo "Cleaning"
+                    sh "rm -rf dist"
+                }
+            }
+        }
         stage("Build"){
             steps{
                 script {
@@ -49,6 +56,7 @@ pipeline {
             }
         }
 
+    
         stage('Publish') {
             steps {
                 sh '''
