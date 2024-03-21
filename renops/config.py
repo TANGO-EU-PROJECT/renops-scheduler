@@ -1,3 +1,4 @@
+import os
 class ipinfo:
     url = "https://ipinfo.io/json"
 
@@ -11,8 +12,11 @@ class renopsapi:
     # renewable_potential = "http://127.0.0.1:8000/v1/forecast/renewable_potential"
     renewable_potential = "https://renops-api-tango.xlab.si/v1/forecast/renewable_potential"
     price = "https://renops-api-tango.xlab.si/v1/forecast/day_ahead_prices"
-    # price = "http://127.0.0.1:8000/v1/forecast/day_ahead_prices"
-    key = "V2_BASIC_ACCESS_KEY"
+    key = os.getenv("RENOPSAPI_KEY")
+    if key is None:
+        msg = "RENOPSAPI_KEY environment variable is not set."
+        msg += " Export it with your API key to remove this error."
+        raise ValueError(msg)
 
 
 class runtime:
