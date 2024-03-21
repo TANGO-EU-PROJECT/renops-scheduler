@@ -11,6 +11,10 @@ pipeline {
 
     environment {
         BRANCH_NAME = "main"
+        timeout(time: 20, unit: 'MINUTES')    
+        // Create credentials in Jenkins for security
+        TWINE_PASSWORD = credentials('pypi-token')
+        RENOPSAPI_KEY = credentials('RENOPSAPI_KEY')
     }
 
     stages {
@@ -21,6 +25,7 @@ pipeline {
               checkout scm
             }
         }
+
 
         stage("Build"){
             steps{
@@ -37,19 +42,54 @@ pipeline {
             }
         }
 
-        stage("Test"){
-            environment {
-                RENOPSAPI_KEY = credentials('RENOPSAPI_KEY')
-            }
+        stage('Publish') {
             steps {
-                script {
-                    echo "Testing"
-                    sh "pip install ."
-                    sh 'pip install pytest'
-                    sh 'python -m pytest'
-                }
+                sh '''
+                    python -m twine upload \
+                        --verbose \
+                        --repository-url https://upload.pypi.org/legacy/  \
+                        --username "__token__" \
+                        --password ${TWINE_PASSWORD} \ 
+                        dist/* 
+                '''
             }
-        
+        } 
+        stage('Test') {
+            parallel {
+                stage('Python 3.8') {
+                    agent { label 'python-3.8' } 
+                    steps {
+                        runTest() 
+                    }
+                }
+                stage('Python 3.9') {
+                    agent { label 'python-3.9' } 
+                    steps {
+                        runTest() 
+                    }
+                }
+                stage('Python 3.9') {
+                    agent { label 'python-3.10' } 
+                    steps {
+                        runTest() 
+                    }
+                }
+                stage('Python 3.11') {
+                    agent { label 'python-3.11' } 
+                    steps {
+                        runTest() 
+                    }
+                }
+                
         }
+        // Reusable function 
+        def runTest() {
+            sh '''
+                pip install renops-scheduler
+                echo 'print("hello world!")' > test.py
+                renops-scheduler test.py -la -r 1 -d 1 --optimise-price # Test prices
+            ''' 
+            }
+        }   
     }
 }
