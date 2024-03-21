@@ -1,11 +1,3 @@
-def runTest() {
-    sh '''
-        pip install renops-scheduler
-        echo 'print("hello world!")' > test.py
-        renops-scheduler test.py -la -r 1 -d 1 --optimise-price # Test prices
-    ''' 
-}
-
 pipeline {
     agent {
         node {
@@ -66,20 +58,15 @@ pipeline {
             }
         } 
         stage('Test') {
-            parallel {
-                stage('Python 3.8') {
-                    agent { label 'python-3.8' } 
-                    steps {
-                        runTest() 
-                    }
+            steps {
+                script {
+                    sh '''
+                        pip install renops-scheduler
+                        echo 'print("hello world!")' > test.py
+                        renops-scheduler test.py -la -r 1 -d 1 --optimise-price # Test prices
+                    ''' 
                 }
-                stage('Python 3.9') {
-                    agent { label 'python-3.9' } 
-                    steps {
-                        runTest() 
-                    }
-                }    
-            }        
+            }
         }   
     }
 }
