@@ -1,3 +1,11 @@
+def runTest() {
+    sh '''
+        pip install renops-scheduler
+        echo 'print("hello world!")' > test.py
+        renops-scheduler test.py -la -r 1 -d 1 --optimise-price # Test prices
+    ''' 
+}
+
 pipeline {
     agent {
         node {
@@ -26,7 +34,6 @@ pipeline {
               checkout scm
             }
         }
-
 
         stage("Build"){
             steps{
@@ -79,13 +86,7 @@ pipeline {
                 
         }
         // Reusable function 
-        def runTest() {
-            sh '''
-                pip install renops-scheduler
-                echo 'print("hello world!")' > test.py
-                renops-scheduler test.py -la -r 1 -d 1 --optimise-price # Test prices
-            ''' 
-            }
+        
         }   
     }
 }
