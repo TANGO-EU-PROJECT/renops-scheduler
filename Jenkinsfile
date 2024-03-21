@@ -70,23 +70,8 @@ pipeline {
                     steps {
                         runTest() 
                     }
-                }
-                stage('Python 3.9') {
-                    agent { label 'python-3.10' } 
-                    steps {
-                        runTest() 
-                    }
-                }
-                stage('Python 3.11') {
-                    agent { label 'python-3.11' } 
-                    steps {
-                        runTest() 
-                    }
-                }
-                
-        }
-        // Reusable function 
-        
+                }    
+            }        
         }   
     }
 }
