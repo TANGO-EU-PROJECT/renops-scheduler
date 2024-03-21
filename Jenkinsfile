@@ -42,6 +42,8 @@ pipeline {
                 script {
                     echo "Testing"
                     sh "pip install ."
+                    KEY = credentials('RENOPSAPI_KEY')
+                    sh "export RENOPSAPI_KEY=${KEY}"
                     sh 'pip install pytest'
                     sh 'python -m pytest'
                 }
