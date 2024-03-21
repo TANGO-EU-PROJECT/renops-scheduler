@@ -52,6 +52,7 @@ pipeline {
         stage('Publish') {
             steps {
                 sh '''
+                    pip install twine
                     python -m twine upload --verbose --repository-url https://upload.pypi.org/legacy/ dist/* 
                 '''
             }
