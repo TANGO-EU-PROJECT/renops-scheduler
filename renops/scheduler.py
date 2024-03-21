@@ -67,7 +67,7 @@ class Scheduler():
     def _preprocess_data(self, data):
 
         # Resample to 2H buckets
-        res = data.resample("2H").agg({
+        res = data.resample("2h").agg({
             "metric": "mean",
             "epoch": "first",
             "timestamps_hourly": "first",
