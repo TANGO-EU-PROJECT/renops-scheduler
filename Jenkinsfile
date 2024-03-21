@@ -10,7 +10,7 @@ pipeline {
     }
 
     environment {
-    BRANCH_NAME = "main"
+        BRANCH_NAME = "main"
     }
 
     stages {
@@ -38,11 +38,13 @@ pipeline {
         }
 
         stage("Test"){
+            environment {
+                KEY = credentials('RENOPSAPI_KEY')
+            }
             steps {
                 script {
                     echo "Testing"
                     sh "pip install ."
-                    KEY = credentials('RENOPSAPI_KEY')
                     sh "export RENOPSAPI_KEY=${KEY}"
                     sh 'pip install pytest'
                     sh 'python -m pytest'
