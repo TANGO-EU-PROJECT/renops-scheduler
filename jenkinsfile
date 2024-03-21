@@ -1,0 +1,2 @@
+                    KEY = credentials('RENOPSAPI_KEY')
+                    sh "export RENOPSAPI_KEY=${KEY}"
