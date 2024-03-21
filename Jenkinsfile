@@ -19,7 +19,6 @@ pipeline {
 
     environment {
         BRANCH_NAME = "main"
-        timeout(time: 20, unit: 'MINUTES')    
         // Create credentials in Jenkins for security
         TWINE_PASSWORD = credentials('pypi-token')
         RENOPSAPI_KEY = credentials('RENOPSAPI_KEY')
