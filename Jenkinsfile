@@ -15,6 +15,7 @@ pipeline {
         // Create credentials in Jenkins for security
         TWINE_PASSWORD = credentials('pypi-token')
         RENOPSAPI_KEY = credentials('RENOPSAPI_KEY')
+        TWINE_USERNAME = "__token__" 
     }
 
     stages {
@@ -45,12 +46,7 @@ pipeline {
         stage('Publish') {
             steps {
                 sh '''
-                    python -m twine upload \
-                        --verbose \
-                        --repository-url https://upload.pypi.org/legacy/  \
-                        --username "__token__" \
-                        --password ${TWINE_PASSWORD} \ 
-                        dist/* 
+                    python -m twine upload --verbose --repository-url https://upload.pypi.org/legacy/ dist/* 
                 '''
             }
         } 
