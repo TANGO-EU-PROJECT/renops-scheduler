@@ -39,13 +39,11 @@ pipeline {
 
         stage("Test"){
             environment {
-                KEY = credentials('RENOPSAPI_KEY')
+                RENOPSAPI_KEY = credentials('RENOPSAPI_KEY')
             }
             steps {
                 script {
                     echo "Testing"
-                    sh "export RENOPSAPI_KEY=${KEY}"
-                    sh "printenv"
                     sh "pip install ."
                     sh 'pip install pytest'
                     sh 'python -m pytest'
