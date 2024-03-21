@@ -38,8 +38,13 @@ To use the program, follow these steps:
     ```bash
     $ echo 'print("hello world!")' > test.py
     ```
+3. Export `RENOPSAPI_KEY` env:
 
-3. Run the following command to execute the script with a deadline of 24 hours:
+    ```bash
+    $ export RENOPSAPI_KEY="TANGO_DEMO_KEY" 
+    ```
+    > **_NOTE:_** This is demo key with limited number of request. Contanct us to obtain personal access token. 
+4. Run the following command to execute the script with a deadline of 24 hours:
 
     ```bash
     $ renops-scheduler test.py -la -r 6 -d 24 -v
@@ -51,7 +56,7 @@ To use the program, follow these steps:
     - `-r 6` sets runtime (estimated by user), 
     - `-d 24` sets the deadline to 24 hours. 
 
-3. Scheduler can also find interval with minimal energy price:
+5. Scheduler can also find interval with minimal energy price:
 
     ```bash
     $ renops-scheduler test.py -la -r 6 -d 24 -v --optimise-price
@@ -59,7 +64,7 @@ To use the program, follow these steps:
 
     This is achieved by adding `--optimise-price` flag.
 
-4. Running scheduler without automatic location detection:
+6. Running scheduler without automatic location detection:
     ```bash
     $ renops-scheduler test.py -l "Berlin,Germany" -r 6 -d 24 -v
     ```    
