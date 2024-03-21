@@ -44,9 +44,9 @@ pipeline {
             steps {
                 script {
                     echo "Testing"
+                    sh "export RENOPSAPI_KEY=${KEY}"
                     sh "printenv"
                     sh "pip install ."
-                    sh "export RENOPSAPI_KEY=${KEY}"
                     sh 'pip install pytest'
                     sh 'python -m pytest'
                 }
