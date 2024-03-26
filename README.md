@@ -92,14 +92,78 @@ s = Scheduler(runtime=1,
 s.run()
 ```
 
+## Geographical Shifting
+
+Scheduler allows you to define a set of available endpoints with their associated commands for energy-intensive tasks. The tool intelligently analyzes these locations and selects the optimal one based on your specified metrics (such as renewable energy potential, price, etc.).
+
+### CLI
+
+Populate `locations.json` with following content:
+
+```json
+{
+    "hpc1": {
+        "location": "Berlin, Germany",
+        "cmd": "ssh user@hpc1 python3 test.py"
+    },
+    "hpc2": {
+        "location": "Madrid, Spain",
+        "cmd": "ssh user@hpc2 python3 test.py"
+    },
+    "hpc3": {
+        "location": "Copenhagen, Denmark",
+        "cmd": "ssh user@hpc3 python3 test.py"
+    }
+}
+```
+
+Run scheduler by passing path to `geo-shift.json` together with `--geo-shift` flag
+
+```bash
+$ renops-scheduler locations.json --geo-shift --optimise-price --verbose
+```    
+Scheduler will find optimal location to execute the script based on given metric. 
+
+### Python Script
+
+```python
+from renops.geoshifter import GeoShift
+
+# Define locations and commands for each endpoint
+locations = {
+    "hpc1": {
+        "location": "Berlin, Germany",
+        "cmd": "ssh user@hpc1 python3 test.py"
+    },
+    "hpc2": {
+        "location": "Madrid, Spain",
+        "cmd": "ssh user@hpc2 python3 test.py"
+    },
+    "hpc3": {
+        "location": "Copenhagen, Denmark",
+        "cmd": "ssh user@hpc3 python3 test.py"
+    }
+}
+
+# Intialise the shifter
+gs = GeoShift(
+    locations=locations,
+    optimise_price=True,
+    verbose=True
+)
+
+# Run geoshifter
+gs.shift()
+```
+
 ## Arguments
 The program accepts several command-line arguments to customize the execution. Here's an overview of the available options:
 
 ```
-usage: renops-scheduler [-h] -l LOCATION [-r RUNTIME] [-d DEADLINE] [-v VERBOSE] script_path
+usage: renops-scheduler [-h] [-l LOCATION] [-gs] [-op] [-v] [-r RUNTIME] [-d DEADLINE] script_path
 
 positional arguments:
-  script_path           Path to the script to be executed.
+  script_path           Path to the script to be executed or JSON file in case of geo shifting.
 
 options:
   -h, --help            show this help message and exit
@@ -114,13 +178,28 @@ options:
                            -l a (-la)
                            -l auto
                            -l automatic
-  -r RUNTIME, --runtime RUNTIME
-                        Runtime in hours. (User estimated) - Deafult is 3 hours
-  -d DEADLINE, --deadline DEADLINE
-                        Deadline in hours, by when should script finish running - Default is 120 hours
+  -gs, --geo-shift      JSON on given path should be formated as:
+                        {
+                          "hpc1": {
+                            "location": "Berlin, Germany",
+                            "cmd": "ssh user@hpc1 python3 train.py"
+                          },
+                          "hpc2": {
+                            "location": "Madrid, Spain",
+                            "cmd": "ssh user@hpc2 python3 train.py"
+                          },
+                          "hpc3": {
+                            "location": "Copenhagen, Denmark",
+                            "cmd": "ssh user@hpc3 python3 train.py"
+                          }
+                        }
   -op, --optimise-price
                         Optimise for energy price.
   -v, --verbose         Verbose mode.
+  -r RUNTIME, --runtime RUNTIME
+                        Runtime in hours. (Not for geo shift mode)
+  -d DEADLINE, --deadline DEADLINE
+                        Deadline in hours, by when should script finish running (Not for geo shift mode)
 ```
 ## Privacy
 
