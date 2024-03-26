@@ -6,7 +6,7 @@ from renops.utils import execute_linux_command, get_closest_metric
 
 class GeoShift:
     def __init__(self,
-                 locations: dict, 
+                 locations: dict,
                  optimise_price: bool = False,
                  verbose: bool = False):
         self.locations = locations

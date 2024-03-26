@@ -52,7 +52,7 @@ def run():
                         "{\n"
                         "  \"hpc1\": {\n"
                         "    \"location\": \"Berlin, Germany\",\n"
-                        "    \"cmd\": \"ssh user@hpc1 python3 train.py\"\n" 
+                        "    \"cmd\": \"ssh user@hpc1 python3 train.py\"\n"
                         "  },\n"
                         "  \"hpc2\": {\n"
                         "    \"location\": \"Madrid, Spain\",\n"
