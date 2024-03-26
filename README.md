@@ -125,7 +125,17 @@ options:
 ## Privacy
 
 The script does **not pose security or privacy concerns**, as it runs locally. The communication between our forecasting API is encrypted and includes an approximate location of the requested forecast. Automatic localization through IP is mandatory and must be manually set.
- 
+
+## Licences
+
+This project is licensed under the Apache License - see the LICENSE file for details.
+
+## Data Sources 
+
+- Open meteo (https://open-meteo.com/en/license)
+- NASA POWER API (https://power.larc.nasa.gov/docs/services/api/)
+- ENTSO-e (https://transparency.entsoe.eu/content/static_content/download?path=/Static%20content/terms%20and%20conditions/231018_List_of_Data_available_for_reuse.pdf)
+
 ## Notes
 
 - **renops-scheduler** is currently in beta version and may contain bugs or limitations.
