@@ -1,4 +1,9 @@
 import os
+import uuid
+
+
+class user:
+    uuid = str(uuid.uuid4())[:8]
 
 
 class ipinfo:
