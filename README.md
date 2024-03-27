@@ -209,11 +209,12 @@ The script does **not pose security or privacy concerns**, as it runs locally. T
 
 This project is licensed under the Apache License - see the LICENSE file for details.
 
-## Data Sources 
+## Attributions
 
 - Open meteo (https://open-meteo.com/en/license)
 - NASA POWER API (https://power.larc.nasa.gov/docs/services/api/)
 - ENTSO-e (https://transparency.entsoe.eu/content/static_content/download?path=/Static%20content/terms%20and%20conditions/231018_List_of_Data_available_for_reuse.pdf)
+- OpenStreetMap (https://osmfoundation.org/wiki/Licence)
 
 ## Notes
 
