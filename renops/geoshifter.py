@@ -1,8 +1,9 @@
 import time
 
+import renops.config as conf
 from renops.datafetcher import DataFetcher
 from renops.utils import execute_linux_command, get_closest_metric
-import renops.config as conf
+
 
 class GeoShift:
     def __init__(self,
