@@ -18,6 +18,12 @@ class DataFetcher:
                 (latitude and longitude).
         """
         self.params = GeoLocation(location).params
+        self._check_coordinates()
+
+    def _check_coordinates(self):
+        print(self.params)
+        if self.params["lat"] is None:
+            raise RuntimeError(f"Failed to obtain coordinates from Geocoder!")
 
     def filter_dict(self, in_dict: Dict, keys_to_keep: List) -> Dict:
         """
