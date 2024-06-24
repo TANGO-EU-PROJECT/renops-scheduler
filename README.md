@@ -21,7 +21,7 @@ $ python3 --version
 To install **renops-scheduler**, run the following command:
 
 ```bash
-$ pip install renops-scheduler --index-url https://tango:Nxi3tSRWNzxFpyAxdATv@gitlab.xlab.si/api/v4/projects/2476/packages/pypi/simple
+$ pip install renops-scheduler
 ```
 
 > **_NOTE:_** Command includes deploy token valid until 31.12.2024. Send a request to obtain a new deploy token, if accessing this after the given date.
@@ -42,7 +42,7 @@ To use the program, follow these steps:
 3. Run the following command to execute the script with a deadline of 24 hours:
 
     ```bash
-    $ renops-scheduler test.py -la -r 6 -d 24 -v
+    $ renops-scheduler test.py -la -r 6 -d 24 -v --optimise renewable
     ```
 
     This will execute the `test.py` in an optimal window within the given deadline. 
@@ -54,16 +54,24 @@ To use the program, follow these steps:
 3. Scheduler can also find interval with minimal energy price:
 
     ```bash
-    $ renops-scheduler test.py -la -r 6 -d 24 -v --optimise-price
+    $ renops-scheduler test.py -la -r 6 -d 24 -v --optimise price
     ```
 
-    This is achieved by adding `--optimise-price` flag.
+    This is achieved by adding `--optimise price` flag.
 
 4. Running scheduler without automatic location detection:
     ```bash
     $ renops-scheduler test.py -l "Berlin,Germany" -r 6 -d 24 -v
     ```    
     In cases where a user **does not want to expose its IP**, due to privacy concerns, we can manually specify a rough location in a text description.
+
+5. Scheduler can be used to find inteval with minimal carbon emissions:
+
+    ```bash
+    $ renops-scheduler test.py -la -r 6 -d 24 -v --optimise emissions
+    ```
+
+    This is achieved by adding `--optimise emissions` flag.
 
 ### Import Example
 ```python
@@ -80,20 +88,17 @@ s = Scheduler(runtime=1,
               deadline=1,
               location="Kranj",
               verbose=True,
-              optimise_price=True,
+              optimise_type="price",
               action=test_run,
               argument=([42]),
               kwargs={"text": "Scheduler Test!"})
-
-# Run the scheduler
-s.run()
 ```
 
 ## Arguments
 The program accepts several command-line arguments to customize the execution. Here's an overview of the available options:
 
 ```
-usage: renops-scheduler [-h] -l LOCATION [-r RUNTIME] [-d DEADLINE] [-v VERBOSE] script_path
+usage: renops-scheduler [-h] -l LOCATION [-r RUNTIME] [-d DEADLINE] [-o {renewable,price,emissions}] [-v] script_path
 
 positional arguments:
   script_path           Path to the script to be executed.
@@ -112,11 +117,14 @@ options:
                            -l auto
                            -l automatic
   -r RUNTIME, --runtime RUNTIME
-                        Runtime in hours. (User estimated) - Deafult is 3 hours
+                        Runtime in hours.
   -d DEADLINE, --deadline DEADLINE
-                        Deadline in hours, by when should script finish running - Default is 120 hours
-  -op, --optimise-price
-                        Optimise for energy price.
+                        Deadline in hours, by when should script finish running
+  -o {renewable,price,emissions}, --optimise {renewable,price,emissions}
+                        Choose an optimisation type:
+                         - 'renewable' (renewable potential - renewable energy availability on a scale from 0 to 1)
+                         - 'price' (day-ahead energy price)
+                         - 'emissions' (Carbon emissions in gCO2eq/kWh)
   -v, --verbose         Verbose mode.
 ```
 ## Privacy
