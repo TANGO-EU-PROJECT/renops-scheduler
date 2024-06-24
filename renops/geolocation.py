@@ -48,7 +48,12 @@ class GeoLocation:
         Returns:
             tuple: The latitude and longitude values.
         """
-        response = requests.get(f"{conf.geocoder.url}/search?q={location}&format=json")
+        headers = {
+            'Referer': 'https://renops-api-tango.xlab.si',
+            'User-Agent': f'renops-scheduler-user-{conf.user.uuid}'
+        }
+        response = requests.get(f"{conf.geocoder.url}/search?q={location}&format=json",
+                                headers=headers)
         # Check if the API request was successful
         if response.status_code == 200:
             data = response.json()

@@ -24,8 +24,6 @@ To install **renops-scheduler**, run the following command:
 $ pip install renops-scheduler
 ```
 
-> **_NOTE:_** Command includes deploy token valid until 31.12.2024. Send a request to obtain a new deploy token, if accessing this after the given date.
-
 ## Usage
 
 Once you have installed **renops-scheduler**, you can use it to schedule and execute Python scripts in **command line interface (CLI)**.
@@ -38,8 +36,13 @@ To use the program, follow these steps:
     ```bash
     $ echo 'print("hello world!")' > test.py
     ```
+3. Export `RENOPSAPI_KEY` env:
 
-3. Run the following command to execute the script with a deadline of 24 hours:
+    ```bash
+    $ export RENOPSAPI_KEY="TANGO_DEMO_KEY" 
+    ```
+    > **_NOTE:_** This is demo key with limited number of request. Contanct us to obtain personal access token. 
+4. Run the following command to execute the script with a deadline of 24 hours:
 
     ```bash
     $ renops-scheduler test.py -la -r 6 -d 24 -v --optimise renewable
@@ -51,7 +54,7 @@ To use the program, follow these steps:
     - `-r 6` sets runtime (estimated by user), 
     - `-d 24` sets the deadline to 24 hours. 
 
-3. Scheduler can also find interval with minimal energy price:
+5. Scheduler can also find interval with minimal energy price:
 
     ```bash
     $ renops-scheduler test.py -la -r 6 -d 24 -v --optimise price
@@ -59,7 +62,7 @@ To use the program, follow these steps:
 
     This is achieved by adding `--optimise price` flag.
 
-4. Running scheduler without automatic location detection:
+6. Running scheduler without automatic location detection:
     ```bash
     $ renops-scheduler test.py -l "Berlin,Germany" -r 6 -d 24 -v
     ```    
@@ -94,14 +97,78 @@ s = Scheduler(runtime=1,
               kwargs={"text": "Scheduler Test!"})
 ```
 
+## Geographical Shifting
+
+Scheduler allows you to define a set of available endpoints with their associated commands for energy-intensive tasks. The tool intelligently analyzes these locations and selects the optimal one based on your specified metrics (such as renewable energy potential, price, etc.).
+
+### CLI
+
+Populate `locations.json` with following content:
+
+```json
+{
+    "hpc1": {
+        "location": "Berlin, Germany",
+        "cmd": "ssh user@hpc1 python3 test.py"
+    },
+    "hpc2": {
+        "location": "Madrid, Spain",
+        "cmd": "ssh user@hpc2 python3 test.py"
+    },
+    "hpc3": {
+        "location": "Copenhagen, Denmark",
+        "cmd": "ssh user@hpc3 python3 test.py"
+    }
+}
+```
+
+Run scheduler by passing path to `geo-shift.json` together with `--geo-shift` flag
+
+```bash
+$ renops-scheduler locations.json --geo-shift --optimise-price --verbose
+```    
+Scheduler will find optimal location to execute the script based on given metric. 
+
+### Python Script
+
+```python
+from renops.geoshifter import GeoShift
+
+# Define locations and commands for each endpoint
+locations = {
+    "hpc1": {
+        "location": "Berlin, Germany",
+        "cmd": "ssh user@hpc1 python3 test.py"
+    },
+    "hpc2": {
+        "location": "Madrid, Spain",
+        "cmd": "ssh user@hpc2 python3 test.py"
+    },
+    "hpc3": {
+        "location": "Copenhagen, Denmark",
+        "cmd": "ssh user@hpc3 python3 test.py"
+    }
+}
+
+# Intialise the shifter
+gs = GeoShift(
+    locations=locations,
+    optimise_price=True,
+    verbose=True
+)
+
+# Run geoshifter
+gs.shift()
+```
+
 ## Arguments
 The program accepts several command-line arguments to customize the execution. Here's an overview of the available options:
 
 ```
-usage: renops-scheduler [-h] -l LOCATION [-r RUNTIME] [-d DEADLINE] [-o {renewable,price,emissions}] [-v] script_path
+usage: renops-scheduler [-h] -l LOCATION [-gs] [-o {renewable,price,emissions}] [-v] [-r RUNTIME] [-d DEADLINE] script_path
 
 positional arguments:
-  script_path           Path to the script to be executed.
+  script_path           Path to the script to be executed or JSON file in case of geo shifting.
 
 options:
   -h, --help            show this help message and exit
@@ -116,21 +183,50 @@ options:
                            -l a (-la)
                            -l auto
                            -l automatic
-  -r RUNTIME, --runtime RUNTIME
-                        Runtime in hours.
-  -d DEADLINE, --deadline DEADLINE
-                        Deadline in hours, by when should script finish running
+ 
   -o {renewable,price,emissions}, --optimise {renewable,price,emissions}
                         Choose an optimisation type:
                          - 'renewable' (renewable potential - renewable energy availability on a scale from 0 to 1)
                          - 'price' (day-ahead energy price)
                          - 'emissions' (Carbon emissions in gCO2eq/kWh)
+
+  -gs, --geo-shift      JSON on given path should be formated as:
+                        {
+                          "hpc1": {
+                            "location": "Berlin, Germany",
+                            "cmd": "ssh user@hpc1 python3 train.py"
+                          },
+                          "hpc2": {
+                            "location": "Madrid, Spain",
+                            "cmd": "ssh user@hpc2 python3 train.py"
+                          },
+                          "hpc3": {
+                            "location": "Copenhagen, Denmark",
+                            "cmd": "ssh user@hpc3 python3 train.py"
+                          }
+                        }
+ 
   -v, --verbose         Verbose mode.
+  -r RUNTIME, --runtime RUNTIME
+                        Runtime in hours. (Not for geo shift mode)
+  -d DEADLINE, --deadline DEADLINE
+                        Deadline in hours, by when should script finish running (Not for geo shift mode)
 ```
 ## Privacy
 
 The script does **not pose security or privacy concerns**, as it runs locally. The communication between our forecasting API is encrypted and includes an approximate location of the requested forecast. Automatic localization through IP is mandatory and must be manually set.
- 
+
+## Licences
+
+This project is licensed under the Apache License - see the LICENSE file for details.
+
+## Attributions
+
+- Open meteo (https://open-meteo.com/en/license)
+- NASA POWER API (https://power.larc.nasa.gov/docs/services/api/)
+- ENTSO-e (https://transparency.entsoe.eu/content/static_content/download?path=/Static%20content/terms%20and%20conditions/231018_List_of_Data_available_for_reuse.pdf)
+- OpenStreetMap (https://osmfoundation.org/wiki/Licence)
+
 ## Notes
 
 - **renops-scheduler** is currently in beta version and may contain bugs or limitations.

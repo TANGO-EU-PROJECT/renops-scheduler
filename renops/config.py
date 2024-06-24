@@ -1,6 +1,9 @@
 import os
 from enum import Enum
+import uuid
 
+class user:
+    uuid = str(uuid.uuid4())[:8]
 
 class ipinfo:
     url = "https://ipinfo.io/json"

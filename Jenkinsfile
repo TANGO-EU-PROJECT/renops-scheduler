@@ -11,6 +11,10 @@ pipeline {
 
     environment {
         BRANCH_NAME = "main"
+        // Create credentials in Jenkins for security
+        TWINE_PASSWORD = credentials('pypi-token')
+        RENOPSAPI_KEY = credentials('RENOPSAPI_KEY')
+        TWINE_USERNAME = "__token__" 
     }
 
     stages {
@@ -21,7 +25,14 @@ pipeline {
               checkout scm
             }
         }
-
+        stage("Clean"){
+            steps{
+                script {
+                    echo "Cleaning"
+                    sh "rm -rf dist"
+                }
+            }
+        }
         stage("Build"){
             steps{
                 script {
@@ -37,19 +48,25 @@ pipeline {
             }
         }
 
-        stage("Test"){
-            environment {
-                RENOPSAPI_KEY = credentials('RENOPSAPI_KEY')
+    
+        stage('Publish') {
+            steps {
+                sh '''
+                    pip install twine
+                    python -m twine upload --verbose --repository-url https://upload.pypi.org/legacy/ dist/* 
+                '''
             }
+        } 
+        stage('Test') {
             steps {
                 script {
-                    echo "Testing"
-                    sh "pip install ."
-                    sh 'pip install pytest'
-                    sh 'python -m pytest'
+                    sh '''
+                        pip install renops-scheduler
+                        echo 'print("hello world!")' > test.py
+                        renops-scheduler test.py -la -r 1 -d 1 --optimise-price # Test prices
+                    ''' 
                 }
             }
-        
-        }
+        }   
     }
 }
