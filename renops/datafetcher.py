@@ -22,7 +22,6 @@ class DataFetcher:
         self._check_coordinates()
 
     def _check_coordinates(self):
-        print(self.params)
         if self.params["lat"] is None:
             raise RuntimeError("Failed to obtain coordinates from Geocoder!")
 
