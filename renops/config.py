@@ -1,6 +1,7 @@
 import os
 from enum import Enum
 
+
 class ipinfo:
     url = "https://ipinfo.io/json"
 

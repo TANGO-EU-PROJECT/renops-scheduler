@@ -2,9 +2,13 @@
 
 import argparse
 import sys
+import warnings
 from argparse import RawTextHelpFormatter
 
+from renops.config import OptimisationType
 from renops.scheduler import Scheduler, execute_script
+
+warnings.simplefilter('always', DeprecationWarning)
 
 
 def main():

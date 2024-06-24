@@ -1,4 +1,5 @@
 import sys
+import time
 from typing import Dict, List, Union
 
 import pandas as pd
@@ -23,7 +24,7 @@ class DataFetcher:
     def _check_coordinates(self):
         print(self.params)
         if self.params["lat"] is None:
-            raise RuntimeError(f"Failed to obtain coordinates from Geocoder!")
+            raise RuntimeError("Failed to obtain coordinates from Geocoder!")
 
     def filter_dict(self, in_dict: Dict, keys_to_keep: List) -> Dict:
         """
@@ -89,7 +90,6 @@ class DataFetcher:
         """
         # Get reponse
         response = self._request_data(conf.renopsapi.price)
-
         # Rename columns
         response["metric"] = response["day_ahead_prices"]
 

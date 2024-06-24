@@ -134,7 +134,6 @@ class Scheduler():
             (res.index >= self.current_epoch) & (res.index <= self.start_execution_epoch)
         ]
         filtered_res = filtered_res.loc[res.metric != 0]
-
         return filtered_res
 
     def _get_current_renewables(self, data):
@@ -142,7 +141,6 @@ class Scheduler():
         renewables_now = renewables_now.metric.values[
             0
         ].round(2)
-
         return renewables_now
 
     def _update_global_config(self):
@@ -157,7 +155,6 @@ class Scheduler():
 
         if self.v:
             print("Task has to be finished by: ", to_datetime(self.deadline_epoch))
-
         if len(filtered_res) <= 1:
             renewables_now = self._get_current_renewables(data)
             filtered_res[self.current_epoch] = renewables_now
