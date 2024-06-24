@@ -1,4 +1,5 @@
 import sys
+import time
 from typing import Dict, List, Union
 
 import pandas as pd
@@ -18,6 +19,12 @@ class DataFetcher:
                 (latitude and longitude).
         """
         self.params = GeoLocation(location).params
+        self._check_coordinates()
+
+    def _check_coordinates(self):
+        print(self.params)
+        if self.params["lat"] is None:
+            raise RuntimeError("Failed to obtain coordinates from Geocoder!")
 
     def filter_dict(self, in_dict: Dict, keys_to_keep: List) -> Dict:
         """
@@ -26,12 +33,18 @@ class DataFetcher:
         return {key: in_dict[key] for key in keys_to_keep}
 
     def _request_data(self, url: str) -> Dict:
-        response = requests.get(
-                url, params=self.params, headers={"key": conf.renopsapi.key}
-            )
-        response.raise_for_status()  # Raises an exception for 4xx or 5xx status codes
-
-        return response.json()
+        max_retries = conf.renopsapi.max_retries
+        for attempt in range(max_retries):
+            try:
+                response = requests.get(url, params=self.params, headers={"key": conf.renopsapi.key})
+                response.raise_for_status()  # Raises an exception for 4xx or 5xx status codes
+                return response.json()
+            except requests.RequestException as e:
+                if attempt < max_retries - 1:
+                    print(f"Requested endpoint is down, waiting {conf.renopsapi.secs_between_retries} seconds before retry {attempt+1} / {max_retries} ...")  # noqa
+                    time.sleep(conf.renopsapi.secs_between_retries)  # Wait 30 seconds before retrying
+                else:
+                    raise RuntimeError(f"Failed to retrieve data after {max_retries} attempts") from e
 
     def _preporcess_data(self, response: Dict) -> pd.DataFrame:
         # Define needed keys for calculating renewable potential
@@ -77,18 +90,35 @@ class DataFetcher:
         """
         # Get reponse
         response = self._request_data(conf.renopsapi.price)
-
         # Rename columns
         response["metric"] = response["day_ahead_prices"]
 
         return response
 
-    def fetch(self, optimise_price):
+    def fetch_emissions(self) -> Dict:
+        """Fetches carbon emissions from renops api
+
+        Returns:
+            Dict or none: Json if ok, None if an error occured
+        """
+        # Get response
+        response = self._request_data(conf.renopsapi.carbon_emissions)
+        # Rename column
+        response["metric"] = response["carbon_emissions"]
+        return response
+
+    def fetch(self, optimise_type: str):
         try:
-            if optimise_price:
+            if optimise_type == "price":
                 response = self.fetch_prices()
-            else:
+            elif optimise_type == "carbon_emissions":
+                response = self.fetch_emissions()
+            elif optimise_type == "renewable_potential":
                 response = self.fetch_renewable_potential()
+            else:
+                print("ERROR: optimise type not valid")
+                sys.exit(1)
+
             return self._preporcess_data(response)
 
         except requests.exceptions.RequestException as e:

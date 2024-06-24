@@ -67,7 +67,9 @@ class GeoLocation:
                 print(f'Settlement "{location}" not found.')
                 return None, None
         else:
-            print(f"API request failed with status code {response.status_code}.")
+            print(f"API request to Geocoding API failed with status code {response.status_code}.")
+            print("You might have to wait a while, before you can use it again)")
+            print("tip: Use automatic location setting to avoid this error. ")
         return None, None
 
     def _get_location(self) -> Dict:

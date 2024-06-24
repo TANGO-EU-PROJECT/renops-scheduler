@@ -1,4 +1,4 @@
-# renops-scheduler
+# renops-scheduler (MIGRATED TO https://github.com/TANGO-EU-PROJECT/renops-scheduler)
 
 **renops-scheduler** is a Python package that allows you to schedule and execute scripts at the time the most renewable energy is available.
 
@@ -45,7 +45,7 @@ To use the program, follow these steps:
 4. Run the following command to execute the script with a deadline of 24 hours:
 
     ```bash
-    $ renops-scheduler test.py -la -r 6 -d 24 -v
+    $ renops-scheduler test.py -la -r 6 -d 24 -v --optimise renewable
     ```
 
     This will execute the `test.py` in an optimal window within the given deadline. 
@@ -57,16 +57,24 @@ To use the program, follow these steps:
 5. Scheduler can also find interval with minimal energy price:
 
     ```bash
-    $ renops-scheduler test.py -la -r 6 -d 24 -v --optimise-price
+    $ renops-scheduler test.py -la -r 6 -d 24 -v --optimise price
     ```
 
-    This is achieved by adding `--optimise-price` flag.
+    This is achieved by adding `--optimise price` flag.
 
 6. Running scheduler without automatic location detection:
     ```bash
     $ renops-scheduler test.py -l "Berlin,Germany" -r 6 -d 24 -v
     ```    
     In cases where a user **does not want to expose its IP**, due to privacy concerns, we can manually specify a rough location in a text description.
+
+5. Scheduler can be used to find inteval with minimal carbon emissions:
+
+    ```bash
+    $ renops-scheduler test.py -la -r 6 -d 24 -v --optimise emissions
+    ```
+
+    This is achieved by adding `--optimise emissions` flag.
 
 ### Import Example
 ```python
@@ -83,13 +91,10 @@ s = Scheduler(runtime=1,
               deadline=1,
               location="Kranj",
               verbose=True,
-              optimise_price=True,
+              optimise_type="price",
               action=test_run,
               argument=([42]),
               kwargs={"text": "Scheduler Test!"})
-
-# Run the scheduler
-s.run()
 ```
 
 ## Geographical Shifting
@@ -160,7 +165,7 @@ gs.shift()
 The program accepts several command-line arguments to customize the execution. Here's an overview of the available options:
 
 ```
-usage: renops-scheduler [-h] [-l LOCATION] [-gs] [-op] [-v] [-r RUNTIME] [-d DEADLINE] script_path
+usage: renops-scheduler [-h] -l LOCATION [-gs] [-o {renewable,price,emissions}] [-v] [-r RUNTIME] [-d DEADLINE] script_path
 
 positional arguments:
   script_path           Path to the script to be executed or JSON file in case of geo shifting.
@@ -178,6 +183,13 @@ options:
                            -l a (-la)
                            -l auto
                            -l automatic
+ 
+  -o {renewable,price,emissions}, --optimise {renewable,price,emissions}
+                        Choose an optimisation type:
+                         - 'renewable' (renewable potential - renewable energy availability on a scale from 0 to 1)
+                         - 'price' (day-ahead energy price)
+                         - 'emissions' (Carbon emissions in gCO2eq/kWh)
+
   -gs, --geo-shift      JSON on given path should be formated as:
                         {
                           "hpc1": {
@@ -193,8 +205,7 @@ options:
                             "cmd": "ssh user@hpc3 python3 train.py"
                           }
                         }
-  -op, --optimise-price
-                        Optimise for energy price.
+ 
   -v, --verbose         Verbose mode.
   -r RUNTIME, --runtime RUNTIME
                         Runtime in hours. (Not for geo shift mode)

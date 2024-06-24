@@ -2,11 +2,15 @@
 
 import argparse
 import sys
+import warnings
 from argparse import RawTextHelpFormatter
 
+from renops.config import OptimisationType
 from renops.geoshifter import GeoShift
 from renops.scheduler import Scheduler, execute_script
 from renops.utils import read_json_from_filename
+
+warnings.simplefilter('always', DeprecationWarning)
 
 
 def main():
@@ -45,6 +49,7 @@ def run():
                 "   -l automatic\n"
             )
         )
+    
     parser.add_argument("-gs",
                         "--geo-shift",
                         action="store_true",
@@ -63,30 +68,67 @@ def run():
                         "    \"cmd\": \"ssh user@hpc3 python3 train.py\"\n"
                         "  }\n"
                         "}")
-    parser.add_argument("-op",
-                        "--optimise-price",
-                        action="store_true",
-                        help="Optimise for energy price.")
-    parser.add_argument("-v",
-                        "--verbose",
-                        action="store_true",
-                        help="Verbose mode.")
+    
+
+    
     parser.add_argument("-r",
                         "--runtime",
                         type=int,
                         default=None,
                         help="Runtime in hours. (Not for geo shift mode)")
+    
     parser.add_argument(
-            "-d",
-            "--deadline",
-            type=int,
-            default=120,
-            help="Deadline in hours, by when should script finish running (Not for geo shift mode)", # noqa
-        )
+        "-d",
+        "--deadline",
+        type=int,
+        default=120,
+        help="Deadline in hours, by when should script finish running (Not for geo shift mode)", # noqa
+    )
+
+    parser.add_argument(
+        "-o", "--optimise",
+        choices=['renewable', 'price', 'emissions'],
+        required=False,
+        help=(
+            "Choose an optimisation type:\n"
+            " - 'renewable' (renewable potential - renewable energy availability on a scale from 0 to 1)\n"
+            " - 'price' (day-ahead energy price)\n"
+            " - 'emissions' (Carbon emissions in gCO2eq/kWh)\n"
+        ),
+    )
+    parser.add_argument("-op", "--optimise-price", action="store_true", help=argparse.SUPPRESS)
+
+    parser.add_argument("-v", "--verbose", action="store_true", help="Verbose mode.")
+
     args = parser.parse_args()
 
+    # Check for the deprecated argument and warn the user
     if args.optimise_price:
-        print("Optimising for price! (Day-ahead forecast only)")
+        warnings.warn(
+            "'--optimise-price' is deprecated and will be removed in future versions. "
+            "Use '--optimise price' instead.",
+            DeprecationWarning
+        )
+        # Map the deprecated argument to the new one if necessary
+        args.optimise = 'price'
+
+    if args.optimise is None:
+        warnings.warn(
+            "Default optimisation type is deprecated and will be mandatory in future versions. "
+            "Setting optimise flag to 'renewable'. "
+            "Use '--optimise ' instead.",
+            DeprecationWarning
+        )
+        args.optimise = "renewable"
+
+    optimisation_map = {
+        'renewable': OptimisationType.renewable_potential,
+        'price': OptimisationType.price,
+        'emissions': OptimisationType.carbon_emissions
+    }
+
+    optimise_type = optimisation_map[args.optimise].value
+
     if args.geo_shift:
         print("Geo shift mode specified, shifting in space...")
         if not args.script_path.endswith(".json"):
@@ -98,10 +140,10 @@ def run():
             verbose=args.verbose,
         )
         s.shift()
+      
     elif args.location:
         print("Location specified, shifting in time...")
         args = parser.parse_args()
-
         if not args.runtime:
             print("Runtime not specified, using default setting of 3 hours!")
             args.runtime = 3
@@ -110,15 +152,15 @@ def run():
             deadline=args.deadline,
             runtime=args.runtime,
             location=args.location,
-            optimise_price=args.optimise_price,
+            optimise_type=optimise_type,
             verbose=args.verbose,
             action=execute_script,
             argument=([args.script_path]),
         )
         s.run()
+    
     else:
         raise ValueError("Specifiy either location (-l) or geo shift mode (-gs). Check --help for more details.") # noqa
-
 
 if __name__ == "__main__":
     main()
