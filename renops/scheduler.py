@@ -73,11 +73,17 @@ class Scheduler():
                  runtime: int,
                  location: str,
                  action: Callable,
-                 verbose: bool = False,
+                 optimise_type: str = "renewable_potential",
                  optimise_price: bool = False,
+                 verbose: bool = False,
                  argument: Tuple[Union[int, str], ...] = (),
                  kwargs: Union[dict, None] = {},
                  ) -> None:
+        if optimise_price:
+            optimise_type = "price"
+            raise DeprecationWarning(
+                "'optimise_price' is deprecated and will be removed in future versions. Use 'optimise_type' instead."
+            )
         self.deadline = deadline
         self.runtime = runtime
         self.location = location
@@ -87,7 +93,7 @@ class Scheduler():
         try:
             self.optimise_type = conf.OptimisationType[optimise_type]
         except KeyError:
-            raise ValueError(f"Invalid option '{optimise_type}', must be one of {[e.value for e in conf.OptimisationType]}.")
+            raise ValueError(f"Invalid option '{optimise_type}', must be one of {[e.value for e in conf.OptimisationType]}.")  # noqa
 
         self.optimise_type = optimise_type
         self.action = action
@@ -96,7 +102,7 @@ class Scheduler():
 
     def get_data(self):
         fetcher = DataFetcher(location=self.location)
-        return fetcher.fetch(self.optimise_price)
+        return fetcher.fetch(self.optimise_type)
 
     def _preprocess_data(self, data):
 
@@ -110,7 +116,7 @@ class Scheduler():
         # Sort to minimise renewable potential
         res = res.set_index("epoch")
 
-        ascending = True if self.optimise_price else False
+        ascending = False if self.optimise_type == "carbon_emissions" else True
 
         res = res.sort_values(by=["metric"], ascending=ascending)
 
