@@ -83,12 +83,30 @@ class DataFetcher:
 
         return response
 
-    def fetch(self, optimise_price):
+    def fetch_emissions(self) -> Dict:
+        """Fetches carbon emissions from renops api
+
+        Returns:
+            Dict or none: Json if ok, None if an error occured
+        """
+        # Get response
+        response = self._request_data(conf.renopsapi.carbon_emissions)
+        # Rename column
+        response["metric"] = response["carbon_emissions"]
+        return response
+
+    def fetch(self, optimise_type: str):
         try:
-            if optimise_price:
+            if optimise_type == "price":
                 response = self.fetch_prices()
-            else:
+            elif optimise_type == "carbon_emissions":
+                response = self.fetch_emissions()
+            elif optimise_type == "renewable_potential":
                 response = self.fetch_renewable_potential()
+            else:
+                print("ERROR: optimise type not valid")
+                sys.exit(1)
+
             return self._preporcess_data(response)
 
         except requests.exceptions.RequestException as e:

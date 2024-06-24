@@ -55,10 +55,17 @@ class Scheduler():
         self.runtime = runtime
         self.location = location
         self.v = verbose
-        self.optimise_price = optimise_price
+        # Allow optimise_type to be a string
+        # Convert string optimise_type to OptimisationType enum
+        try:
+            self.optimise_type = conf.OptimisationType[optimise_type]
+        except KeyError:
+            raise ValueError(f"Invalid option '{optimise_type}', must be one of {[e.value for e in conf.OptimisationType]}.")
+
+        self.optimise_type = optimise_type
         self.action = action
         self.argument = argument
-        self.kwargs = kwargs
+        self.kwargs = kwargs if kwargs is not None else {}
 
     def get_data(self):
         fetcher = DataFetcher(location=self.location)
@@ -125,7 +132,21 @@ class Scheduler():
 
             if self.v:
                 print("No renewable window whitin a given deadline!")
-                print(f"Current renewable potential is: {renewables_now}")
+                print("Current renewable potential is:")
+                if self.optimise_type == "price":
+                    print(
+                        renewables_now,
+                        "EUR/MWh",
+                    )
+                elif self.optimise_type == "carbon_emissions":
+                    print(
+                        renewables_now,
+                        "gCO2eq/kWh",
+                    )
+                elif self.optimise_type == "renewable_potential":
+                    print(
+                       renewables_now,
+                    )
 
         else:
             optimal_time = filtered_res.index[0]
@@ -138,17 +159,24 @@ class Scheduler():
                     "and",
                     to_datetime(filtered_res.index[0] + hour_to_second(self.runtime)),
                 )
-                if self.optimise_price:
+                if self.optimise_type == "price":
                     print(
                         "Energy price at that time is:",
                         filtered_res.metric.values[0].round(2),
                         "EUR/MWh",
                     )
-                else:
+                elif self.optimise_type == "carbon_emissions":
+                    print(
+                        "Carbon emissions at that time are:",
+                        filtered_res.metric.values[0].round(2),
+                        "gCO2eq/kWh",
+                    )
+                elif self.optimise_type == "renewable_potential":
                     print(
                         "Renewable potential at that time is:",
                         filtered_res.metric.values[0].round(2),
                     )
+
                 print(
                     f"Waiting for"
                     f" {convert_seconds_to_hour(diff_seconds)} h"
