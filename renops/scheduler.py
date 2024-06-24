@@ -40,7 +40,34 @@ def to_datetime(epoch):
 
 
 class Scheduler():
+    """
+    Scheduler to optmise scheduling of energy intensive tasks
+    Args:
+        deadline (int): The deadline for the scheduled task.
+        runtime (int): The runtime required for the task.
+        location (str): The location where the task will be executed.
+        action (Callable): The function to be executed.
+        optimise_type (str, optional): The type of optimization optons are "price", "carbon_emmisions",
+                                       "renewable_potential". Defaults to "renewable_potential".
+        optimise_price (bool, optional): Deprecated. Use 'optimise_type' instead. Defaults to False.
+        verbose (bool, optional): Flag to enable verbose output. Defaults to False.
+        argument (Tuple[Union[int, str], ...], optional): Arguments for the action function. Defaults to ().
+        kwargs (Union[dict, None], optional): Keyword arguments for the action function. Defaults to {}.
 
+    Raises:
+        DeprecationWarning: If 'optimise_price' is used.
+        ValueError: If an invalid 'optimise_type' is provided.
+
+    Attributes:
+        deadline (int): The deadline for the scheduled task.
+        runtime (int): The runtime required for the task.
+        location (str): The location where the task will be executed.
+        v (bool): Verbose flag.
+        optimise_type (str): The type of optimization.
+        action (Callable): The function to be executed.
+        argument (Tuple[Union[int, str], ...]): Arguments for the action function.
+        kwargs (dict): Keyword arguments for the action function.
+    """
     def __init__(self,
                  deadline: int,
                  runtime: int,
