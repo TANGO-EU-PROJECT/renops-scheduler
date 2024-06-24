@@ -32,12 +32,18 @@ class DataFetcher:
         return {key: in_dict[key] for key in keys_to_keep}
 
     def _request_data(self, url: str) -> Dict:
-        response = requests.get(
-                url, params=self.params, headers={"key": conf.renopsapi.key}
-            )
-        response.raise_for_status()  # Raises an exception for 4xx or 5xx status codes
-
-        return response.json()
+        max_retries = conf.renopsapi.max_retries
+        for attempt in range(max_retries):
+            try:
+                response = requests.get(url, params=self.params, headers={"key": conf.renopsapi.key})
+                response.raise_for_status()  # Raises an exception for 4xx or 5xx status codes
+                return response.json()
+            except requests.RequestException as e:
+                if attempt < max_retries - 1:
+                    print(f"Requested endpoint is down, waiting {conf.renopsapi.secs_between_retries} seconds before retry {attempt+1} / {max_retries} ...")  # noqa
+                    time.sleep(conf.renopsapi.secs_between_retries)  # Wait 30 seconds before retrying
+                else:
+                    raise RuntimeError(f"Failed to retrieve data after {max_retries} attempts") from e
 
     def _preporcess_data(self, response: Dict) -> pd.DataFrame:
         # Define needed keys for calculating renewable potential

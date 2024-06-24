@@ -21,6 +21,8 @@ class renopsapi:
         msg = "RENOPSAPI_KEY environment variable is not set."
         msg += " Export it with your API key to remove this error."
         raise ValueError(msg)
+    max_retries = 5
+    secs_between_retries = 15
 
 
 class runtime:
