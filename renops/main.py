@@ -49,7 +49,7 @@ def run():
                 "   -l automatic\n"
             )
         )
-    
+
     parser.add_argument("-gs",
                         "--geo-shift",
                         action="store_true",
@@ -68,15 +68,13 @@ def run():
                         "    \"cmd\": \"ssh user@hpc3 python3 train.py\"\n"
                         "  }\n"
                         "}")
-    
 
-    
     parser.add_argument("-r",
                         "--runtime",
                         type=int,
                         default=None,
                         help="Runtime in hours. (Not for geo shift mode)")
-    
+
     parser.add_argument(
         "-d",
         "--deadline",
@@ -133,14 +131,13 @@ def run():
         print("Geo shift mode specified, shifting in space...")
         if not args.script_path.endswith(".json"):
             raise ValueError("The input file must be a JSON file.")
-
         s = GeoShift(
             locations=read_json_from_filename(args.script_path),
-            optimise_price=args.optimise_price,
+            optimise_type=optimise_type,
             verbose=args.verbose,
         )
         s.shift()
-      
+
     elif args.location:
         print("Location specified, shifting in time...")
         args = parser.parse_args()
@@ -158,9 +155,10 @@ def run():
             argument=([args.script_path]),
         )
         s.run()
-    
+
     else:
         raise ValueError("Specifiy either location (-l) or geo shift mode (-gs). Check --help for more details.") # noqa
+
 
 if __name__ == "__main__":
     main()

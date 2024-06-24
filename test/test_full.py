@@ -112,7 +112,7 @@ class SchedulerTestCarbonEmissions(unittest.TestCase):
         # Add more assertions based on the expected behavior of the method
 
 
-class GeoShiftTests(unittest.TestCase):
+class GeoShiftTestsPotential(unittest.TestCase):
     def setUp(self):
         # Create a GeoShift instance with sample parameters
         self.locations = {
@@ -122,7 +122,34 @@ class GeoShiftTests(unittest.TestCase):
         }
         self.geoshifter = GeoShift(
             locations=self.locations,
-            optimise_price=True,
+            optimise_type="renewable_potential",
+            verbose=True
+        )
+
+    def test_check_subkeys(self):
+        # Test the check_subkeys method
+        self.assertTrue(self.geoshifter.check_subkeys(self.locations))
+        # Add more assertions based on the expected behavior of the method
+
+    def test_shift(self):
+        # Test the shift method
+        stdout, stderr = self.geoshifter.shift()
+        self.assertIsNotNone(stdout)
+        self.assertEqual(stderr, "")
+        # Add more assertions based on the expected behavior of the method
+
+
+class GeoShiftTestsPrice(unittest.TestCase):
+    def setUp(self):
+        # Create a GeoShift instance with sample parameters
+        self.locations = {
+            "Location1": {"location": "Berlin", "cmd": "echo 'Hello, Berlin!'"},
+            "Location2": {"location": "Paris", "cmd": "echo 'Bonjour, Paris!'"},
+
+        }
+        self.geoshifter = GeoShift(
+            locations=self.locations,
+            optimise_type="price",
             verbose=True
         )
 
