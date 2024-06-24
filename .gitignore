@@ -3,3 +3,4 @@ test.py
 tes.sh
 scheduler-playground.ipynb
 **/__pycache__/
+/dist
