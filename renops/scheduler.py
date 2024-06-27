@@ -3,6 +3,8 @@ import time
 from datetime import datetime
 from typing import Callable, Tuple, Union
 
+from loguru import logger
+
 import renops.config as conf
 from renops.datafetcher import DataFetcher
 
@@ -39,7 +41,7 @@ def to_datetime(epoch):
     return datetime.fromtimestamp(epoch).strftime("%Y-%d-%m %H:%M:%S")
 
 
-class Scheduler():
+class Scheduler:
     """
     Scheduler to optmise scheduling of energy intensive tasks
     Args:
@@ -68,17 +70,19 @@ class Scheduler():
         argument (Tuple[Union[int, str], ...]): Arguments for the action function.
         kwargs (dict): Keyword arguments for the action function.
     """
-    def __init__(self,
-                 deadline: int,
-                 runtime: int,
-                 location: str,
-                 action: Callable,
-                 optimise_type: str = "renewable_potential",
-                 optimise_price: bool = False,
-                 verbose: bool = False,
-                 argument: Tuple[Union[int, str], ...] = (),
-                 kwargs: Union[dict, None] = {},
-                 ) -> None:
+
+    def __init__(
+        self,
+        deadline: int,
+        runtime: int,
+        location: str,
+        action: Callable,
+        optimise_type: str = "renewable_potential",
+        optimise_price: bool = False,
+        verbose: bool = False,
+        argument: Tuple[Union[int, str], ...] = (),
+        kwargs: Union[dict, None] = {},
+    ) -> None:
         if optimise_price:
             optimise_type = "price"
             raise DeprecationWarning(
@@ -93,7 +97,9 @@ class Scheduler():
         try:
             self.optimise_type = conf.OptimisationType[optimise_type]
         except KeyError:
-            raise ValueError(f"Invalid option '{optimise_type}', must be one of {[e.value for e in conf.OptimisationType]}.")  # noqa
+            raise ValueError(
+                f"Invalid option '{optimise_type}', must be one of {[e.value for e in conf.OptimisationType]}."
+            )  # noqa
 
         self.optimise_type = optimise_type
         self.action = action
@@ -107,11 +113,13 @@ class Scheduler():
     def _preprocess_data(self, data):
 
         # Resample to 2H buckets
-        res = data.resample("2h").agg({
-            "metric": "mean",
-            "epoch": "first",
-            "timestamps_hourly": "first",
-        })
+        res = data.resample("2h").agg(
+            {
+                "metric": "mean",
+                "epoch": "first",
+                "timestamps_hourly": "first",
+            }
+        )
 
         # Sort to minimise renewable potential
         res = res.set_index("epoch")
@@ -131,16 +139,15 @@ class Scheduler():
 
     def _filter_samples(self, res):
         filtered_res = res[
-            (res.index >= self.current_epoch) & (res.index <= self.start_execution_epoch)
+            (res.index >= self.current_epoch)
+            & (res.index <= self.start_execution_epoch)
         ]
         filtered_res = filtered_res.loc[res.metric != 0]
         return filtered_res
 
     def _get_current_renewables(self, data):
         renewables_now = data[data.epoch >= self.current_epoch]
-        renewables_now = renewables_now.metric.values[
-            0
-        ].round(2)
+        renewables_now = renewables_now.metric.values[0].round(2)
         return renewables_now
 
     def _update_global_config(self):
@@ -154,60 +161,47 @@ class Scheduler():
         filtered_res = self._filter_samples(res)
 
         if self.v:
-            print("Task has to be finished by: ", to_datetime(self.deadline_epoch))
+            logger.info(
+                f"Task has to be finished by: {to_datetime(self.deadline_epoch)}"
+            )
         if len(filtered_res) <= 1:
             renewables_now = self._get_current_renewables(data)
             filtered_res[self.current_epoch] = renewables_now
             optimal_time = self.current_epoch
 
             if self.v:
-                print("No renewable window whitin a given deadline!")
-                print("Current renewable potential is:")
+                logger.info("No renewable window whitin a given deadline!")
                 if self.optimise_type == "price":
-                    print(
-                        renewables_now,
-                        "EUR/MWh",
-                    )
+                    logger.info(f"Current energy price is: {renewables_now} EUR/MWh")
                 elif self.optimise_type == "carbon_emissions":
-                    print(
-                        renewables_now,
-                        "gCO2eq/kWh",
+                    logger.info(
+                        f"Current carbon emissions are: {renewables_now} gCO2eq/kWh"
                     )
                 elif self.optimise_type == "renewable_potential":
-                    print(
-                       renewables_now,
-                    )
+                    logger.info(f"Current renewable potential is: {renewables_now}")
 
         else:
             optimal_time = filtered_res.index[0]
             diff_seconds = optimal_time - self.current_epoch
 
             if self.v:
-                print(
-                    "Found optimal time between ",
-                    to_datetime(filtered_res.index[0]),
-                    "and",
-                    to_datetime(filtered_res.index[0] + hour_to_second(self.runtime)),
+                logger.info(
+                    f"Found optimal time between {to_datetime(filtered_res.index[0])} and {to_datetime(filtered_res.index[0] + hour_to_second(self.runtime))}",  # noqa
                 )
                 if self.optimise_type == "price":
-                    print(
-                        "Energy price at that time is:",
-                        filtered_res.metric.values[0].round(2),
-                        "EUR/MWh",
+                    logger.info(
+                        f"Energy price at that time is: {filtered_res.metric.values[0].round(2)} EUR/MWh"
                     )
                 elif self.optimise_type == "carbon_emissions":
-                    print(
-                        "Carbon emissions at that time are:",
-                        filtered_res.metric.values[0].round(2),
-                        "gCO2eq/kWh",
+                    logger.info(
+                        f"Carbon emissions at that time are: {filtered_res.metric.values[0].round(2)} gCO2eq/kWh"
                     )
                 elif self.optimise_type == "renewable_potential":
-                    print(
-                        "Renewable potential at that time is:",
-                        filtered_res.metric.values[0].round(2),
+                    logger.info(
+                        f"Renewable potential at that time is: {filtered_res.metric.values[0].round(2)}"
                     )
 
-                print(
+                logger.info(
                     f"Waiting for"
                     f" {convert_seconds_to_hour(diff_seconds)} h"
                     f" {convert_seconds_to_minutes(diff_seconds)} min"
@@ -217,7 +211,7 @@ class Scheduler():
         wait_until(optimal_time)
 
         if self.v:
-            print(f"Executing action now at {datetime.now()}")
+            logger.info(f"Executing action now at {datetime.now()}")
         if self.v:
-            print("----------------------------------------------------")
+            logger.info("----------------------------------------------------")
         self.action(*self.argument, **self.kwargs)

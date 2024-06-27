@@ -5,7 +5,8 @@ from renops.scheduler import Scheduler
 
 
 class SchedulerTestLocationOutsideEU(unittest.TestCase):
-    """ Test rp on set location outside EU """
+    """Test rp on set location outside EU"""
+
     def setUp(self):
         # Create a Scheduler instance with sample parameters
         self.scheduler = Scheduler(
@@ -16,7 +17,7 @@ class SchedulerTestLocationOutsideEU(unittest.TestCase):
             verbose=True,
             optimise_type="renewable_potential",
             argument=(1, 2, 3),
-            kwargs={"key": "value"}
+            kwargs={"key": "value"},
         )
         self.data = self.scheduler.get_data()
 
@@ -32,7 +33,8 @@ class SchedulerTestLocationOutsideEU(unittest.TestCase):
 
 
 class SchedulerTestAutoLocation(unittest.TestCase):
-    """ Test rp on with auto location """
+    """Test rp on with auto location"""
+
     def setUp(self):
         # Create a Scheduler instance with sample parameters
         self.scheduler = Scheduler(
@@ -43,7 +45,7 @@ class SchedulerTestAutoLocation(unittest.TestCase):
             verbose=True,
             optimise_type="renewable_potential",
             argument=(1, 2, 3),
-            kwargs={"key": "value"}
+            kwargs={"key": "value"},
         )
         self.data = self.scheduler.get_data()
 
@@ -59,7 +61,8 @@ class SchedulerTestAutoLocation(unittest.TestCase):
 
 
 class SchedulerTestPriceOptimisation(unittest.TestCase):
-    """Test price optimisation """
+    """Test price optimisation"""
+
     def setUp(self):
         # Create a Scheduler instance with sample parameters
         self.scheduler = Scheduler(
@@ -70,7 +73,7 @@ class SchedulerTestPriceOptimisation(unittest.TestCase):
             verbose=True,
             optimise_type="price",
             argument=(1, 2, 3),
-            kwargs={"key": "value"}
+            kwargs={"key": "value"},
         )
         self.data = self.scheduler.get_data()
 
@@ -86,7 +89,8 @@ class SchedulerTestPriceOptimisation(unittest.TestCase):
 
 
 class SchedulerTestCarbonEmissions(unittest.TestCase):
-    """Test carbon emissions optimisation """
+    """Test carbon emissions optimisation"""
+
     def setUp(self):
         # Create a Scheduler instance with sample parameters
         self.scheduler = Scheduler(
@@ -97,7 +101,7 @@ class SchedulerTestCarbonEmissions(unittest.TestCase):
             verbose=True,
             optimise_type="carbon_emissions",
             argument=(1, 2, 3),
-            kwargs={"key": "value"}
+            kwargs={"key": "value"},
         )
         self.data = self.scheduler.get_data()
 
@@ -118,12 +122,9 @@ class GeoShiftTestsPotential(unittest.TestCase):
         self.locations = {
             "Location1": {"location": "Berlin", "cmd": "echo 'Hello, Berlin!'"},
             "Location2": {"location": "Paris", "cmd": "echo 'Bonjour, Paris!'"},
-
         }
         self.geoshifter = GeoShift(
-            locations=self.locations,
-            optimise_type="renewable_potential",
-            verbose=True
+            locations=self.locations, optimise_type="renewable_potential", verbose=True
         )
 
     def test_check_subkeys(self):
@@ -145,12 +146,9 @@ class GeoShiftTestsPrice(unittest.TestCase):
         self.locations = {
             "Location1": {"location": "Berlin", "cmd": "echo 'Hello, Berlin!'"},
             "Location2": {"location": "Paris", "cmd": "echo 'Bonjour, Paris!'"},
-
         }
         self.geoshifter = GeoShift(
-            locations=self.locations,
-            optimise_type="price",
-            verbose=True
+            locations=self.locations, optimise_type="price", verbose=True
         )
 
     def test_check_subkeys(self):
@@ -166,5 +164,5 @@ class GeoShiftTestsPrice(unittest.TestCase):
         # Add more assertions based on the expected behavior of the method
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
