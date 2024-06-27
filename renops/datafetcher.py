@@ -32,18 +32,12 @@ class DataFetcher:
         return {key: in_dict[key] for key in keys_to_keep}
 
     def _request_data(self, url: str) -> Dict:
-        max_retries = conf.renopsapi.max_retries
-        for attempt in range(max_retries):
-            try:
-                response = requests.get(url, params=self.params, headers={"key": conf.renopsapi.key})
-                response.raise_for_status()  # Raises an exception for 4xx or 5xx status codes
-                return response.json()
-            except requests.RequestException as e:
-                if attempt < max_retries - 1:
-                    print(f"Requested endpoint is down, waiting {conf.renopsapi.secs_between_retries} seconds before retry {attempt+1} / {max_retries} ...")  # noqa
-                    time.sleep(conf.renopsapi.secs_between_retries)  # Wait 30 seconds before retrying
-                else:
-                    raise RuntimeError(f"Failed to retrieve data after {max_retries} attempts") from e
+        response = requests.get(
+            url, params=self.params, headers={"key": conf.renopsapi.key}
+        )
+        response.raise_for_status()  # Raises an exception for 4xx or 5xx status codes
+
+        return response.json()
 
     def _preporcess_data(self, response: Dict) -> pd.DataFrame:
         # Define needed keys for calculating renewable potential
@@ -107,24 +101,41 @@ class DataFetcher:
         return response
 
     def fetch(self, optimise_type: str):
-        try:
-            if optimise_type == "price":
-                response = self.fetch_prices()
-            elif optimise_type == "carbon_emissions":
-                response = self.fetch_emissions()
-            elif optimise_type == "renewable_potential":
-                response = self.fetch_renewable_potential()
-            else:
-                print("ERROR: optimise type not valid")
-                sys.exit(1)
+        max_retries = conf.renopsapi.max_retries
 
-            return self._preporcess_data(response)
+        for attempt in range(max_retries):
 
-        except requests.exceptions.RequestException as e:
-            print("Error occurred:", str(e))
-            if "422" in str(e):
-                print(
-                    "Could not map a bidding zone to given coordinate. "
-                    "Check (https://www.entsoe.eu/network_codes/bzr/) for more details."
+            try:
+                if optimise_type == "price":
+                    response = self.fetch_prices()
+                elif optimise_type == "carbon_emissions":
+                    response = self.fetch_emissions()
+                elif optimise_type == "renewable_potential":
+                    response = self.fetch_renewable_potential()
+                else:
+                    print("ERROR: optimise type not valid")
+                    sys.exit(1)
+
+                return self._preporcess_data(response)
+
+            except requests.exceptions.RequestException as e:
+                print("Error occurred:", str(e))
+
+                if "502" in str(e):
+                    if attempt < max_retries - 1:
+                        print(
+                            f"Requested endpoint is down {e}, waiting {conf.renopsapi.secs_between_retries} seconds before retry {attempt+1} / {max_retries} ..."
+                        )  # noqa
+                        time.sleep(
+                            conf.renopsapi.secs_between_retries
+                        )  # Wait 30 seconds before retrying
+                    else:
+                        raise RuntimeError(
+                            f"Failed to retrieve data after {max_retries} attempts"
+                        ) from e
+                if "422" in str(e):
+                    print(
+                        "Could not map a bidding zone to given coordinate. "
+                        "Check (https://www.entsoe.eu/network_codes/bzr/) for more details."
                     )
-            sys.exit(1)
+                    sys.exit(1)
