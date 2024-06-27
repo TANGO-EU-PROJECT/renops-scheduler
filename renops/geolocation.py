@@ -1,6 +1,7 @@
 from typing import Any, Dict, Tuple, Union
 
 import requests
+from loguru import logger
 
 import renops.config as conf
 
@@ -25,19 +26,19 @@ class GeoLocation:
             # When location is defined as a word
             lat, lon = self._geocode_location(location)
             if conf.runtime.verbose:
-                print(f"Location specified: {location}, lat: {lat} lon: {lon}")
+                logger.info(f"Location specified: {location}, lat: {lat} lon: {lon}")
         elif location in auto_synonyms:
             # When location is set to auto
             loc = self._get_location()
             if conf.runtime.verbose:
-                print(
+                logger.warning(
                     f'Location is set to auto, IP will be used to detect location! found: {loc["city"]},'
                     f' {loc["country"]}'
                 )
             lat, lon = loc["loc"].split(",")
         # elif isinstance(location, dict) and "lat" in location and "lon" in location:
         #    lat, lon = location["lat"], location["lon"]
-        #    print(f"Location specified: {location}")
+        #    logger.info(f"Location specified: {location}")
         else:
             raise ValueError("Invalid location format")
         return {"lat": lat, "lon": lon}
@@ -67,14 +68,14 @@ class GeoLocation:
                 lng = data[0]["lon"]
                 return lat, lng
             else:
-                print(f'Settlement "{location}" not found.')
+                logger.info(f'Settlement "{location}" not found.')
                 return None, None
         else:
-            print(
+            logger.error(
                 f"API request to Geocoding API failed with status code {response.status_code}."
             )
-            print("You might have to wait a while, before you can use it again)")
-            print("tip: Use automatic location setting to avoid this error. ")
+            logger.info("You might have to wait a while, before you can use it again)")
+            logger.info("tip: Use automatic location setting to avoid this error. ")
         return None, None
 
     def _get_location(self) -> Dict:

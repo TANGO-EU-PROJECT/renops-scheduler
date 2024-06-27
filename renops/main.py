@@ -5,6 +5,8 @@ import sys
 import warnings
 from argparse import RawTextHelpFormatter
 
+from loguru import logger
+
 from renops.config import OptimisationType
 from renops.geoshifter import GeoShift
 from renops.scheduler import Scheduler, execute_script
@@ -18,20 +20,20 @@ def main():
         run()
 
     except ValueError as error:
-        print(f"ValueError: {error}")
+        logger.error(f"ValueError: {error}")
         sys.exit(1)  # Exiting with status code 1 signifies an error
 
     except KeyboardInterrupt:
-        print("\nKeyboard interrupt detected. Exiting.")
+        logger.error("\nKeyboard interrupt detected. Exiting.")
         sys.exit(0)  # Exiting with status code 0 signifies a clean exit
 
     except Exception as ex:
-        print(f"An unexpected error occurred: {ex}")
+        logger.error(f"An unexpected error occurred: {ex}")
         sys.exit(1)  # Exiting with status code 1 for error
 
 
 def run():
-    print("RUNNING RENOPS SCHEDULER...")
+    logger.info("RUNNING RENOPS SCHEDULER...")
     parser = argparse.ArgumentParser(formatter_class=RawTextHelpFormatter)
     parser.add_argument(
         "script_path",
@@ -138,7 +140,7 @@ def run():
     optimise_type = optimisation_map[args.optimise].value
 
     if args.geo_shift:
-        print("Geo shift mode specified, shifting in space...")
+        logger.info("Geo shift mode specified, shifting in space...")
         if not args.script_path.endswith(".json"):
             raise ValueError("The input file must be a JSON file.")
         s = GeoShift(
@@ -149,10 +151,10 @@ def run():
         s.shift()
 
     elif args.location:
-        print("Location specified, shifting in time...")
+        logger.info("Location specified, shifting in time...")
         args = parser.parse_args()
         if not args.runtime:
-            print("Runtime not specified, using default setting of 3 hours!")
+            logger.info("Runtime not specified, using default setting of 3 hours!")
             args.runtime = 3
 
         s = Scheduler(

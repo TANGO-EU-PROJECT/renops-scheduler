@@ -3,6 +3,8 @@ import time
 from datetime import datetime
 from typing import Callable, Tuple, Union
 
+from loguru import logger
+
 import renops.config as conf
 from renops.datafetcher import DataFetcher
 
@@ -159,60 +161,47 @@ class Scheduler:
         filtered_res = self._filter_samples(res)
 
         if self.v:
-            print("Task has to be finished by: ", to_datetime(self.deadline_epoch))
+            logger.info(
+                f"Task has to be finished by: {to_datetime(self.deadline_epoch)}"
+            )
         if len(filtered_res) <= 1:
             renewables_now = self._get_current_renewables(data)
             filtered_res[self.current_epoch] = renewables_now
             optimal_time = self.current_epoch
 
             if self.v:
-                print("No renewable window whitin a given deadline!")
-                print("Current renewable potential is:")
+                logger.info("No renewable window whitin a given deadline!")
                 if self.optimise_type == "price":
-                    print(
-                        renewables_now,
-                        "EUR/MWh",
-                    )
+                    logger.info(f"Current energy price is: {renewables_now} EUR/MWh")
                 elif self.optimise_type == "carbon_emissions":
-                    print(
-                        renewables_now,
-                        "gCO2eq/kWh",
+                    logger.info(
+                        f"Current carbon emissions are: {renewables_now} gCO2eq/kWh"
                     )
                 elif self.optimise_type == "renewable_potential":
-                    print(
-                        renewables_now,
-                    )
+                    logger.info(f"Current renewable potential is: {renewables_now}")
 
         else:
             optimal_time = filtered_res.index[0]
             diff_seconds = optimal_time - self.current_epoch
 
             if self.v:
-                print(
-                    "Found optimal time between ",
-                    to_datetime(filtered_res.index[0]),
-                    "and",
-                    to_datetime(filtered_res.index[0] + hour_to_second(self.runtime)),
+                logger.info(
+                    f"Found optimal time between {to_datetime(filtered_res.index[0])} and {to_datetime(filtered_res.index[0] + hour_to_second(self.runtime))}",  # noqa
                 )
                 if self.optimise_type == "price":
-                    print(
-                        "Energy price at that time is:",
-                        filtered_res.metric.values[0].round(2),
-                        "EUR/MWh",
+                    logger.info(
+                        f"Energy price at that time is: {filtered_res.metric.values[0].round(2)} EUR/MWh"
                     )
                 elif self.optimise_type == "carbon_emissions":
-                    print(
-                        "Carbon emissions at that time are:",
-                        filtered_res.metric.values[0].round(2),
-                        "gCO2eq/kWh",
+                    logger.info(
+                        f"Carbon emissions at that time are: {filtered_res.metric.values[0].round(2)} gCO2eq/kWh"
                     )
                 elif self.optimise_type == "renewable_potential":
-                    print(
-                        "Renewable potential at that time is:",
-                        filtered_res.metric.values[0].round(2),
+                    logger.info(
+                        f"Renewable potential at that time is: {filtered_res.metric.values[0].round(2)}"
                     )
 
-                print(
+                logger.info(
                     f"Waiting for"
                     f" {convert_seconds_to_hour(diff_seconds)} h"
                     f" {convert_seconds_to_minutes(diff_seconds)} min"
@@ -222,7 +211,7 @@ class Scheduler:
         wait_until(optimal_time)
 
         if self.v:
-            print(f"Executing action now at {datetime.now()}")
+            logger.info(f"Executing action now at {datetime.now()}")
         if self.v:
-            print("----------------------------------------------------")
+            logger.info("----------------------------------------------------")
         self.action(*self.argument, **self.kwargs)

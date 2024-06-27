@@ -1,5 +1,7 @@
 import time
 
+from loguru import logger
+
 import renops.config as conf
 from renops.datafetcher import DataFetcher
 from renops.utils import execute_linux_command, get_closest_metric
@@ -43,7 +45,7 @@ class GeoShift:
             )
             current_metric = get_closest_metric(forecast, current_epoch)
             if self.verbose:
-                print(
+                logger.info(
                     f"Current metric for {key} in {value['location']} is: {current_metric:.2f}"
                 )
             metrics[key] = current_metric
@@ -55,11 +57,11 @@ class GeoShift:
 
         ep = self.locations[best_location]
 
-        print(f'Found optimal location: {best_location}, {ep["location"]}!')
-        print(f"... Running specified command: {ep['cmd']}!")
+        logger.info(f'Found optimal location: {best_location}, {ep["location"]}!')
+        logger.info(f"... Running specified command: {ep['cmd']}!")
 
         stdout, stderr = execute_linux_command(ep["cmd"])
-        print(f"stdout: {stdout}")
-        print(f"stderr: {stderr}")
+        logger.info(f"stdout: {stdout}")
+        logger.info(f"stderr: {stderr}")
 
         return stdout, stderr

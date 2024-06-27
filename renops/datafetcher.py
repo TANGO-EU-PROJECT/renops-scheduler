@@ -4,6 +4,7 @@ from typing import Dict, List, Union
 
 import pandas as pd
 import requests
+from loguru import logger
 
 import renops.config as conf
 from renops.geolocation import GeoLocation
@@ -113,17 +114,17 @@ class DataFetcher:
                 elif optimise_type == "renewable_potential":
                     response = self.fetch_renewable_potential()
                 else:
-                    print("ERROR: optimise type not valid")
+                    logger.error("optimise type not valid!")
                     sys.exit(1)
 
                 return self._preporcess_data(response)
 
             except requests.exceptions.RequestException as e:
-                print("Error occurred:", str(e))
+                logger.error({str(e)})
 
                 if "502" in str(e):
                     if attempt < max_retries - 1:
-                        print(
+                        logger.error(
                             f"Requested endpoint is down {e}, waiting {conf.renopsapi.secs_between_retries} seconds before retry {attempt+1} / {max_retries} ..."  # noqa
                         )  # noqa
                         time.sleep(
@@ -134,7 +135,7 @@ class DataFetcher:
                             f"Failed to retrieve data after {max_retries} attempts"
                         ) from e
                 if "422" in str(e):
-                    print(
+                    logger.error(
                         "Could not map a bidding zone to given coordinate. "
                         "Check (https://www.entsoe.eu/network_codes/bzr/) for more details."
                     )
