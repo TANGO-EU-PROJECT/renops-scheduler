@@ -124,7 +124,7 @@ class DataFetcher:
                 if "502" in str(e):
                     if attempt < max_retries - 1:
                         print(
-                            f"Requested endpoint is down {e}, waiting {conf.renopsapi.secs_between_retries} seconds before retry {attempt+1} / {max_retries} ..."
+                            f"Requested endpoint is down {e}, waiting {conf.renopsapi.secs_between_retries} seconds before retry {attempt+1} / {max_retries} ..."  # noqa
                         )  # noqa
                         time.sleep(
                             conf.renopsapi.secs_between_retries
