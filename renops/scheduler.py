@@ -39,7 +39,7 @@ def to_datetime(epoch):
     return datetime.fromtimestamp(epoch).strftime("%Y-%d-%m %H:%M:%S")
 
 
-class Scheduler():
+class Scheduler:
     """
     Scheduler to optmise scheduling of energy intensive tasks
     Args:
@@ -68,17 +68,19 @@ class Scheduler():
         argument (Tuple[Union[int, str], ...]): Arguments for the action function.
         kwargs (dict): Keyword arguments for the action function.
     """
-    def __init__(self,
-                 deadline: int,
-                 runtime: int,
-                 location: str,
-                 action: Callable,
-                 optimise_type: str = "renewable_potential",
-                 optimise_price: bool = False,
-                 verbose: bool = False,
-                 argument: Tuple[Union[int, str], ...] = (),
-                 kwargs: Union[dict, None] = {},
-                 ) -> None:
+
+    def __init__(
+        self,
+        deadline: int,
+        runtime: int,
+        location: str,
+        action: Callable,
+        optimise_type: str = "renewable_potential",
+        optimise_price: bool = False,
+        verbose: bool = False,
+        argument: Tuple[Union[int, str], ...] = (),
+        kwargs: Union[dict, None] = {},
+    ) -> None:
         if optimise_price:
             optimise_type = "price"
             raise DeprecationWarning(
@@ -93,7 +95,9 @@ class Scheduler():
         try:
             self.optimise_type = conf.OptimisationType[optimise_type]
         except KeyError:
-            raise ValueError(f"Invalid option '{optimise_type}', must be one of {[e.value for e in conf.OptimisationType]}.")  # noqa
+            raise ValueError(
+                f"Invalid option '{optimise_type}', must be one of {[e.value for e in conf.OptimisationType]}."
+            )  # noqa
 
         self.optimise_type = optimise_type
         self.action = action
@@ -107,11 +111,13 @@ class Scheduler():
     def _preprocess_data(self, data):
 
         # Resample to 2H buckets
-        res = data.resample("2h").agg({
-            "metric": "mean",
-            "epoch": "first",
-            "timestamps_hourly": "first",
-        })
+        res = data.resample("2h").agg(
+            {
+                "metric": "mean",
+                "epoch": "first",
+                "timestamps_hourly": "first",
+            }
+        )
 
         # Sort to minimise renewable potential
         res = res.set_index("epoch")
@@ -131,16 +137,15 @@ class Scheduler():
 
     def _filter_samples(self, res):
         filtered_res = res[
-            (res.index >= self.current_epoch) & (res.index <= self.start_execution_epoch)
+            (res.index >= self.current_epoch)
+            & (res.index <= self.start_execution_epoch)
         ]
         filtered_res = filtered_res.loc[res.metric != 0]
         return filtered_res
 
     def _get_current_renewables(self, data):
         renewables_now = data[data.epoch >= self.current_epoch]
-        renewables_now = renewables_now.metric.values[
-            0
-        ].round(2)
+        renewables_now = renewables_now.metric.values[0].round(2)
         return renewables_now
 
     def _update_global_config(self):
@@ -175,7 +180,7 @@ class Scheduler():
                     )
                 elif self.optimise_type == "renewable_potential":
                     print(
-                       renewables_now,
+                        renewables_now,
                     )
 
         else:

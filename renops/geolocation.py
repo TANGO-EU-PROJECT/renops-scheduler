@@ -9,7 +9,9 @@ class GeoLocation:
     def __init__(self, location: Union[str, Dict[str, float]] = None):
         self.params = self._get_location_params(location)
 
-    def _get_location_params(self, location: Union[None, str, Dict[str, float]]) -> Dict[str, Any]:
+    def _get_location_params(
+        self, location: Union[None, str, Dict[str, float]]
+    ) -> Dict[str, Any]:
         """
         Returns the parameters based on the provided location (city name or coordinates).
         Args:
@@ -49,11 +51,12 @@ class GeoLocation:
             tuple: The latitude and longitude values.
         """
         headers = {
-            'Referer': 'https://renops-api-tango.xlab.si',
-            'User-Agent': f'renops-scheduler-user-{conf.user.uuid}'
+            "Referer": "https://renops-api-tango.xlab.si",
+            "User-Agent": f"renops-scheduler-user-{conf.user.uuid}",
         }
-        response = requests.get(f"{conf.geocoder.url}/search?q={location}&format=json",
-                                headers=headers)
+        response = requests.get(
+            f"{conf.geocoder.url}/search?q={location}&format=json", headers=headers
+        )
         # Check if the API request was successful
         if response.status_code == 200:
             data = response.json()
@@ -67,7 +70,9 @@ class GeoLocation:
                 print(f'Settlement "{location}" not found.')
                 return None, None
         else:
-            print(f"API request to Geocoding API failed with status code {response.status_code}.")
+            print(
+                f"API request to Geocoding API failed with status code {response.status_code}."
+            )
             print("You might have to wait a while, before you can use it again)")
             print("tip: Use automatic location setting to avoid this error. ")
         return None, None

@@ -6,36 +6,46 @@ from renops.utils import execute_linux_command, get_closest_metric
 
 
 class GeoShift:
-    def __init__(self,
-                 locations: dict,
-                 optimise_type: str = "renewable_potential",
-                 verbose: bool = False):
+    def __init__(
+        self,
+        locations: dict,
+        optimise_type: str = "renewable_potential",
+        verbose: bool = False,
+    ):
         self.locations = locations
         self.verbose = verbose
         try:
             self.optimise_type = conf.OptimisationType[optimise_type]
         except KeyError:
-            raise ValueError(f"Invalid option '{optimise_type}', must be one of {[e.value for e in conf.OptimisationType]}.")  # noqa
+            raise ValueError(
+                f"Invalid option '{optimise_type}', must be one of {[e.value for e in conf.OptimisationType]}."
+            )  # noqa
 
         self.optimise_type = optimise_type
 
     def check_subkeys(self, dictionary: dict) -> bool:
         for key, value in dictionary.items():
-            if 'location' not in value or 'cmd' not in value:
+            if "location" not in value or "cmd" not in value:
                 return False
         return True
 
     def shift(self):
         if not self.check_subkeys(self.locations):
-            raise ValueError('Each dictionary in the input dictionary must have a "location" and "cmd" key.')
+            raise ValueError(
+                'Each dictionary in the input dictionary must have a "location" and "cmd" key.'
+            )
 
         metrics = {}
         for key, value in self.locations.items():
             current_epoch = int(time.time())
-            forecast = DataFetcher(value['location']).fetch(optimise_type=self.optimise_type)
+            forecast = DataFetcher(value["location"]).fetch(
+                optimise_type=self.optimise_type
+            )
             current_metric = get_closest_metric(forecast, current_epoch)
             if self.verbose:
-                print(f"Current metric for {key} in {value['location']} is: {current_metric:.2f}")
+                print(
+                    f"Current metric for {key} in {value['location']} is: {current_metric:.2f}"
+                )
             metrics[key] = current_metric
 
         if self.optimise_type == "renewable_potential":
@@ -48,7 +58,7 @@ class GeoShift:
         print(f'Found optimal location: {best_location}, {ep["location"]}!')
         print(f"... Running specified command: {ep['cmd']}!")
 
-        stdout, stderr = execute_linux_command(ep['cmd'])
+        stdout, stderr = execute_linux_command(ep["cmd"])
         print(f"stdout: {stdout}")
         print(f"stderr: {stderr}")
 

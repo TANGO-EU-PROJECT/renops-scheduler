@@ -5,10 +5,9 @@ import numpy as np
 import pandas as pd
 
 
-def get_closest_metric(data,
-                       current_epoch: int,
-                       metric_col="metric",
-                       epoch_col="epoch") -> float:
+def get_closest_metric(
+    data, current_epoch: int, metric_col="metric", epoch_col="epoch"
+) -> float:
     """
     This function takes a pandas DataFrame, a current epoch value,
     and column names for metric and epoch as input.
@@ -29,7 +28,7 @@ def get_closest_metric(data,
     """
 
     # Ensure numerical data types for epoch
-    data[epoch_col] = pd.to_numeric(data[epoch_col], errors='coerce')
+    data[epoch_col] = pd.to_numeric(data[epoch_col], errors="coerce")
 
     # Handle potential missing values in epoch column
     if data[epoch_col].isnull().any():
@@ -46,15 +45,14 @@ def get_closest_metric(data,
 
 
 def execute_linux_command(command):
-    process = subprocess.Popen(command,
-                               shell=True,
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
+    process = subprocess.Popen(
+        command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
     output, errors = process.communicate()
     return output.decode(), errors.decode()
 
 
 def read_json_from_filename(filename):
-    with open(filename, 'r') as file:
+    with open(filename, "r") as file:
         data = json.load(file)
     return data
