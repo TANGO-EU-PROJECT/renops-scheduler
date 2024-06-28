@@ -120,7 +120,7 @@ class DataFetcher:
                 return self._preporcess_data(response)
 
             except requests.exceptions.RequestException as e:
-                logger.error({str(e)})
+                logger.error(str(e))
 
                 if "502" in str(e):
                     if attempt < max_retries - 1:

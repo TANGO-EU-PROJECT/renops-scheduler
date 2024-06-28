@@ -124,7 +124,9 @@ class Scheduler:
         # Sort to minimise renewable potential
         res = res.set_index("epoch")
 
-        ascending = False if self.optimise_type == "carbon_emissions" else True
+        # In case of rewewable potential we maximise, in case of price and
+        # emissions we minimise
+        ascending = False if self.optimise_type == "renewable_potential" else True
 
         res = res.sort_values(by=["metric"], ascending=ascending)
 
@@ -153,60 +155,89 @@ class Scheduler:
     def _update_global_config(self):
         conf.runtime.set_verbose(self.v)
 
+    def _calculate_estimated_improvement(self, val_now: float, val_min: float) -> float:
+        """Returns estimated precent reducing given optmisation type
+        The lower the better, i.e. -5 would save 5 %.
+
+        Args:
+            data (pd.DataFrame): dataframe populated with predictions
+        """
+        diff = val_min - val_now
+        diff_perc = (diff / val_now) * 100
+
+        if self.optimise_type in ["price", "carbon_emissions"]:
+            diff_perc *= (
+                -1
+            )  # In case of price and carbon we minimise, in case of renewable we maxismise
+
+        return diff_perc
+
+    def _print_info_for_instant_execution(self):
+        if self.optimise_type == "price":
+            logger.info(f"Current energy price is: {self.renewables_now} EUR/MWh")
+        elif self.optimise_type == "carbon_emissions":
+            logger.info(
+                f"Current carbon emissions are: {self.renewables_now} gCO2eq/kWh"
+            )
+        elif self.optimise_type == "renewable_potential":
+            logger.info(f"Current renewable potential is: {self.renewables_now}")
+
     def run(self):
         self._update_global_config()
         data = self.get_data()
         res = self._preprocess_data(data)
         self._extract_epochs()  # extract deadilnes runtimes etc TODO
         filtered_res = self._filter_samples(res)
-
+        self.renewables_now = self._get_current_renewables(data)
         if self.v:
             logger.info(
                 f"Task has to be finished by: {to_datetime(self.deadline_epoch)}"
             )
         if len(filtered_res) <= 1:
-            renewables_now = self._get_current_renewables(data)
-            filtered_res[self.current_epoch] = renewables_now
+            filtered_res[self.current_epoch] = self.renewables_now
             optimal_time = self.current_epoch
 
             if self.v:
                 logger.info("No renewable window whitin a given deadline!")
-                if self.optimise_type == "price":
-                    logger.info(f"Current energy price is: {renewables_now} EUR/MWh")
-                elif self.optimise_type == "carbon_emissions":
-                    logger.info(
-                        f"Current carbon emissions are: {renewables_now} gCO2eq/kWh"
-                    )
-                elif self.optimise_type == "renewable_potential":
-                    logger.info(f"Current renewable potential is: {renewables_now}")
+                self._print_info_for_instant_execution()
 
         else:
             optimal_time = filtered_res.index[0]
             diff_seconds = optimal_time - self.current_epoch
+            current_val = self._get_current_renewables(data)
+            minimal_val = filtered_res.metric.values[0].round(2)
+            diff_perc = self._calculate_estimated_improvement(current_val, minimal_val)
 
-            if self.v:
+            if diff_perc < conf.runtime.min_savings_perc:
                 logger.info(
-                    f"Found optimal time between {to_datetime(filtered_res.index[0])} and {to_datetime(filtered_res.index[0] + hour_to_second(self.runtime))}",  # noqa
+                    f"Estimated savings ({diff_perc:.2f}) % are too low, executing now!"
                 )
-                if self.optimise_type == "price":
+                if self.v:
+                    self._print_info_for_instant_execution()
+            else:
+                if self.v:
                     logger.info(
-                        f"Energy price at that time is: {filtered_res.metric.values[0].round(2)} EUR/MWh"
-                    )
-                elif self.optimise_type == "carbon_emissions":
-                    logger.info(
-                        f"Carbon emissions at that time are: {filtered_res.metric.values[0].round(2)} gCO2eq/kWh"
-                    )
-                elif self.optimise_type == "renewable_potential":
-                    logger.info(
-                        f"Renewable potential at that time is: {filtered_res.metric.values[0].round(2)}"
+                        f"Found optimal time between {to_datetime(filtered_res.index[0])} and {to_datetime(filtered_res.index[0] + hour_to_second(self.runtime))}",  # noqa
                     )
 
-                logger.info(
-                    f"Waiting for"
-                    f" {convert_seconds_to_hour(diff_seconds)} h"
-                    f" {convert_seconds_to_minutes(diff_seconds)} min"
-                    f"..."
-                )
+                    if self.optimise_type == "price":
+                        msg = f"Energy price at that time is: {minimal_val} EUR/MWh"
+
+                    elif self.optimise_type == "carbon_emissions":
+                        msg = f"Carbon emissions at that time are: {minimal_val} gCO2eq/kWh"
+
+                    elif self.optimise_type == "renewable_potential":
+                        msg = f"Renewable potential at that time is: {minimal_val}"
+
+                    logger.info(
+                        msg + f", where esitmated savings are {diff_perc:.2f} %"
+                    )
+                    logger.info(
+                        f"Waiting for"
+                        f" {convert_seconds_to_hour(diff_seconds)} h"
+                        f" {convert_seconds_to_minutes(diff_seconds)} min"
+                        f"..."
+                    )
 
         wait_until(optimal_time)
 

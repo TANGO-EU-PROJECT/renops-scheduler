@@ -36,6 +36,7 @@ class renopsapi:
 class runtime:
     verbose = False
     sleep_seconds = 10
+    min_savings_perc = 5  # If savings too small, we execute now
 
     @classmethod
     def set_verbose(cls, value):
