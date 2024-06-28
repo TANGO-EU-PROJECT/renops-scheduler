@@ -124,7 +124,9 @@ class Scheduler:
         # Sort to minimise renewable potential
         res = res.set_index("epoch")
 
-        ascending = False if self.optimise_type == "carbon_emissions" else True
+        # In case of rewewable potential we maximise, in case of price and
+        # emissions we minimise
+        ascending = False if self.optimise_type == "renewable_potential" else True
 
         res = res.sort_values(by=["metric"], ascending=ascending)
 
