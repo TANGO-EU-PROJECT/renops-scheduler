@@ -1,4 +1,4 @@
-# renops-scheduler (MIGRATED TO https://github.com/TANGO-EU-PROJECT/renops-scheduler)
+# renops-scheduler
 
 **renops-scheduler** is a Python package that allows you to schedule and execute scripts at the time the most renewable energy is available.
 
