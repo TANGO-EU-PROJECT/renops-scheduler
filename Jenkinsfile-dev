@@ -17,8 +17,16 @@ pipeline {
         
         stage('Checkout') {
           steps {
-              echo 'Checkout SCM'
+              echo 'Checkout SCM and install requirements'
               checkout scm
+            }
+        }
+
+        stage('Install requirements') {
+          steps {
+              echo 'Checkout SCM and install requirements'
+              checkout scm
+              sh "pip install -r requirements.txt"
             }
         }
         
