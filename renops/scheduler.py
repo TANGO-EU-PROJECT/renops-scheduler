@@ -209,6 +209,8 @@ class Scheduler:
             diff_perc = self._calculate_estimated_improvement(current_val, minimal_val)
 
             if diff_perc < conf.runtime.min_savings_perc:
+                # set optimal time to now
+                optimal_time = self.current_epoch
                 logger.info(
                     f"Estimated savings ({diff_perc:.2f}) % are too low, executing now!"
                 )
